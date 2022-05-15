@@ -12,6 +12,8 @@ from app.api.cms.model.user_group import UserGroup
 from app.api.cms.model.user_identity import UserIdentity
 from app.config.code_message import MESSAGE
 
+from app.api.investmentV1.scheduler.decorator import executeJob
+
 app = create_app(
     group_model=Group,
     user_model=User,
@@ -78,6 +80,16 @@ if app.config.get("ENV") != "production":
         </div>
         """
 
+
+"""
+# coding:utf-8
+@Time    : 2022/04/30
+@Author  : sushuai
+@desc    : 使用装饰器定时启动任务
+@notes   : 使用flask run命令启动时，需要将调用函数写在最外层，才能正确调用
+           使用py命令调用时，需要将调用函数写在主函数里才能正确调用
+"""
+executeJob()
 
 if __name__ == "__main__":
     app.logger.warning(

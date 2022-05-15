@@ -14,9 +14,13 @@ from app.util.common import basedir
 def register_blueprints(app):
     from app.api.cms import create_cms
     from app.api.v1 import create_v1
+    # 引入 investmentV1 蓝图
+    from app.api.investmentV1 import create_investmentV1
 
     app.register_blueprint(create_v1(), url_prefix="/v1")
     app.register_blueprint(create_cms(), url_prefix="/cms")
+    # 注册 investmentV1 蓝图
+    app.register_blueprint(create_investmentV1(), url_prefix="/investmentV1")
 
 
 def register_cli(app):
