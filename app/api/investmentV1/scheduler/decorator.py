@@ -57,7 +57,7 @@ def read_core_index_excel():
     # 创建局部数据库对象
     conn = SQLAlchemy(app)
     print(str(datetime.datetime.now()) + ' Job 1 executed')
-    # readFile(conn, path_coreIndex)
+    readFile(conn, path_coreIndex)
 
 
 # 定时任务实现代码：将excel数据导入数据库
