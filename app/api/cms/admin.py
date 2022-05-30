@@ -40,7 +40,7 @@ admin_api = Blueprint("admin", __name__)
 
 
 @admin_api.route("/permission")
-@permission_meta(name="查询所有可分配的权限", module="管理员", mount=False)
+@permission_meta(name="查询所有可分配的权限", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],
@@ -54,7 +54,7 @@ def permissions():
 
 
 @admin_api.route("/users")
-@permission_meta(name="查询所有用户", module="管理员", mount=False)
+@permission_meta(name="查询所有用户", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],
@@ -131,7 +131,7 @@ def get_admin_users(query: QueryPageSchema):
 
 
 @admin_api.route("/user/<int:uid>/password", methods=["PUT"])
-@permission_meta(name="修改用户密码", module="管理员", mount=False)
+@permission_meta(name="修改用户密码", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],
@@ -154,7 +154,7 @@ def change_user_password(uid: int, json: ResetPasswordSchema):
 
 
 @admin_api.route("/user/<int:uid>", methods=["DELETE"])
-@permission_meta(name="删除用户", module="管理员", mount=False)
+@permission_meta(name="删除用户", module="管理员", mount=True)
 @Logger(template="管理员删除了一个用户")
 @admin_required
 @api.validate(
@@ -182,7 +182,7 @@ def delete_user(uid):
 
 
 @admin_api.route("/user/<int:uid>", methods=["PUT"])
-@permission_meta(name="管理员更新用户信息", module="管理员", mount=False)
+@permission_meta(name="管理员更新用户信息", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],
@@ -226,7 +226,7 @@ def update_user(uid: int, json: UpdateUserInfoSchema):
 
 
 @admin_api.route("/group/all")
-@permission_meta(name="查询所有分组", module="管理员", mount=False)
+@permission_meta(name="查询所有分组", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],
@@ -247,7 +247,7 @@ def get_all_group():
 
 
 @admin_api.route("/group/<int:gid>")
-@permission_meta(name="查询一个分组及其权限", module="管理员", mount=False)
+@permission_meta(name="查询一个分组及其权限", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],
@@ -268,7 +268,7 @@ def get_group(gid):
 
 
 @admin_api.route("/group", methods=["POST"])
-@permission_meta(name="新建分组", module="管理员", mount=False)
+@permission_meta(name="新建分组", module="管理员", mount=True)
 @Logger(template="管理员新建了一个分组")  # 记录日志
 @admin_required
 @api.validate(
@@ -303,7 +303,7 @@ def create_group(json: CreateGroupSchema):
 
 
 @admin_api.route("/group/<int:gid>", methods=["PUT"])
-@permission_meta(name="更新一个分组", module="管理员", mount=False)
+@permission_meta(name="更新一个分组", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],
@@ -325,7 +325,7 @@ def update_group(gid, json: GroupBaseSchema):
 
 
 @admin_api.route("/group/<int:gid>", methods=["DELETE"])
-@permission_meta(name="删除一个分组", module="管理员", mount=False)
+@permission_meta(name="删除一个分组", module="管理员", mount=True)
 @Logger(template="管理员删除一个分组")  # 记录日志
 @admin_required
 @api.validate(
@@ -357,7 +357,7 @@ def delete_group(gid):
 
 
 @admin_api.route("/permission/dispatch/batch", methods=["POST"])
-@permission_meta(name="分配多个权限", module="管理员", mount=False)
+@permission_meta(name="分配多个权限", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],
@@ -384,7 +384,7 @@ def dispatch_auths(json: GroupIdWithPermissionIdListSchema):
 
 
 @admin_api.route("/permission/remove", methods=["POST"])
-@permission_meta(name="删除多个权限", module="管理员", mount=False)
+@permission_meta(name="删除多个权限", module="管理员", mount=True)
 @admin_required
 @api.validate(
     tags=["管理员"],

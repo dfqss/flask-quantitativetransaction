@@ -6,6 +6,7 @@ from app.api.investmentV1.model.listingDateCal import MbaListingDateCal
 # end 模型必须引用后才能在数据库初始化对应表
 from lin import db
 from itertools import zip_longest
+from sqlalchemy import or_, and_, not_
 # from flask import jsonify
 
 coreIndex_api = Blueprint("coreIndex", __name__)
@@ -37,7 +38,8 @@ def get_coreIndexsByPage(page, limit):
         MbaCoreIndex.final_cal_core,
         MbaCoreIndex.cal_date,
         MbaListingDateCal.is_new_shares)
-        .join(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code)
+        .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code)
+        .filter(and_(MbaCoreIndex.status.__eq__('0')))
         .offset(startIndex)
         .limit(limit)
     )
@@ -52,4 +54,14 @@ def get_coreIndexsByPage(page, limit):
 # 核心指数分页查询
 @coreIndex_api.route('/getcoreIndexsTotal', methods=["GET"])
 def get_coreIndexsTotal():
-    return MbaCoreIndex.query.count()
+    pageData = (
+        db.session.query(MbaCoreIndex.code,
+        MbaCoreIndex.code_name,
+        MbaCoreIndex.final_cal_core,
+        MbaCoreIndex.cal_date,
+        MbaListingDateCal.is_new_shares)
+        .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code)
+        .filter(and_(MbaCoreIndex.status.__eq__('0'))).count()
+    )
+    return pageData
+    # return MbaCoreIndex.query.count()

@@ -3,6 +3,7 @@ import os
 
 # 获取某一个指定目录下的所有指定文件名
 def getFileNameList(path, suffix):
+    path = os.path.abspath(os.path.realpath(path))
     fileNameList = []
     # 判断文件路径是否存在
     if not os.path.exists(path):
@@ -18,8 +19,10 @@ def getFileNameList(path, suffix):
 # 批量修改文件名后缀：修改源文件
 def renameFilesSuffix(path, fileNameList, renameFromSuffix, renameToSuffix):
     for filename in fileNameList:
-        oldFileName = path + '\\' + filename
-        newFileName = path + '\\' + filename.replace(renameFromSuffix, renameToSuffix)
+        oldFileName = os.path.join(path, filename)
+        # oldFileName = path + '\\' + filename
+        newFileName = os.path.join(path, filename.replace(renameFromSuffix, renameToSuffix))
+        # newFileName = path + '\\' + filename.replace(renameFromSuffix, renameToSuffix)
         os.rename(oldFileName, newFileName)
 
 

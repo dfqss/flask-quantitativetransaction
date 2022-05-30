@@ -30,7 +30,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
-import datetime
+# import datetime
 from app.api.investmentV1.scheduler.tasking.batchFiles import readFile
 from app.api.investmentV1.scheduler.tasking.coreIndex import createOrUpdateCoreIndex
 from app.config.development import DevelopmentConfig
@@ -38,11 +38,12 @@ from app.config.development import DevelopmentConfig
 # 定义全局变量
 app = Flask(__name__)
 
-# 加载数据配置
+# 加载配置
 app.config.from_object(DevelopmentConfig())
 
-# 创建一个全局的数据库连接对象，一个数据库连接对象下执行与同一个session
-# conn = SQLAlchemy(app)
+# 创建全局的数据库连接对象，一个数据库连接对象下执行与同一个session
+job_conn1 = SQLAlchemy(app)
+job_conn2 = SQLAlchemy(app)
 
 # 获取定时器对象
 scheduler = APScheduler()
@@ -52,26 +53,30 @@ path_coreIndex = DevelopmentConfig.BATCH_FILES_PATH_CORE_INDEX
 
 
 # 定时任务实现代码：预读excel文件
-@scheduler.task('interval', id='do_job_1', seconds=15, misfire_grace_time=900)
+@scheduler.task('interval', id='do_job_1', seconds=45, misfire_grace_time=900)
 def read_core_index_excel():
     # 创建局部数据库对象
-    conn = SQLAlchemy(app)
-    print(str(datetime.datetime.now()) + ' Job 1 executed')
-    readFile(conn, path_coreIndex)
+    # print(str(datetime.datetime.now()) + ' Job 1 executed')
+    app.logger.info('Job 1 executed-读取核心指标文件')
+    try:
+        readFile(job_conn1, path_coreIndex)
+    except Exception as e:
+        app.logger.error('读取核心指标文件失败，开始事务回滚:' + str(e))
+        job_conn1.session.rollback()
 
 
 # 定时任务实现代码：将excel数据导入数据库
-@scheduler.task('interval', id='do_job_2', seconds=120, misfire_grace_time=900)
+@scheduler.task('interval', id='do_job_2', seconds=180, misfire_grace_time=900)
 def import_core_index_data():
     # 创建局部数据库对象
-    conn = SQLAlchemy(app)
-    print(str(datetime.datetime.now()) + ' Job 2 executed')
+    # print(str(datetime.datetime.now()) + ' Job 2 executed')
+    app.logger.info('Job 2 executed-核心指标数据计算入库')
     try:
-        createOrUpdateCoreIndex(conn)
-        conn.session.commit()
+        createOrUpdateCoreIndex(job_conn2)
+        job_conn2.session.commit()
     except Exception as e:
-        print('开始回滚数据:' + str(e))
-        conn.session.rollback()
+        app.logger.error('核心指标数据入库失败:' + str(e))
+        job_conn2.session.rollback()
 
 
 # 执行定时任务

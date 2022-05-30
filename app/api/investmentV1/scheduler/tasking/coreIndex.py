@@ -4,6 +4,9 @@ from app.util.excel import readExcel
 import datetime
 from app.util.common import filterNewDictList
 from sqlalchemy import or_, and_, not_
+from flask import Flask
+
+app = Flask(__name__)
 
 
 # 批量创建或更新核心指数表
@@ -11,7 +14,7 @@ def createOrUpdateCoreIndex(conn):
     keys = ['code', 'name', 'core']
     file = get_file_names(conn)
     if len(file) <= 0:
-        print('没有需要读取的核心指标文件')
+        app.logger.info('没有需要计算的核心指标数据')
         return
     filePath = file[0][0]
     fileName = file[0][1]
@@ -22,24 +25,24 @@ def createOrUpdateCoreIndex(conn):
     # 3.当核心指数表的数据不为空时：新增并更新核心指数表
     if len(coreIndexData) > 0:
         # 将上一期的数据原封不动插入到历史表中
-        print('开始备份上次数据')
+        app.logger.info('开始备份上期数据')
         backup_hist(conn)
         # 创建核心指数数据
-        print('新增')
+        app.logger.info('新增核心指标数据')
         create_core_index(conn, excelData, coreIndexData)
         # 更新核心指数数据
-        print('更新')
+        app.logger.info('更新核心指标数据')
         update_core_index(conn, excelData, coreIndexData)
         # 更新计算日期：更新为当前时间
-        print('更新日期')
+        app.logger.info('更新计算日期')
         update_cal_date(conn)
-        print('更新展示次数')
+        app.logger.info('更新展示次数')
         update_show_times(conn)
-        print('完成核心指数计算')
+        app.logger.info('完成核心指数计算')
     else:
-        print('首次初始化数据')
+        app.logger.info('首次初始化核心指标数据')
         create_core_index(conn, excelData, coreIndexData)
-        print('初始化数据完成')
+        app.logger.info('初始化核心指标数据完成')
     # 更新数据读取状态
     update_batch_files_status(conn, fileName, '1')
 
@@ -91,7 +94,6 @@ def update_core_index(conn, excelData, coreIndexData):
             # 当结果不为空的时候，将字典更新到updateList中
             if bool(updateDic):
                 updateList.append(updateDic)
-    # print(updateList)
     # 更新核心指数列表
     if len(updateList) != 0:
         sql = "update mba_core_index set " \
@@ -101,7 +103,8 @@ def update_core_index(conn, excelData, coreIndexData):
         conn.session.execute(sql, updateList)
         # conn.session.commit()
     else:
-        print('集合为空，不需要更新')
+        # app.logger.info('集合为空，不需要更新')
+        pass
 
 
 # 更新计算日期：更新为当前时间
@@ -131,7 +134,6 @@ def assembleData(coreIndexObj, excelDataDic):
             returnDataDic['period_core'] = coreIndexObj['period_core']
             returnDataDic['current_core'] = coreIndexObj['current_core']
             returnDataDic['final_cal_core'] = coreIndexObj['final_cal_core']
-            print('excel中的数据为空：' + excelDataDic['code'])
         else:
             # 将表中current_core的值与excel中的核心指标进行对比：如果不一样则进行计算
             currentCore = coreIndexObj['current_core']
@@ -145,7 +147,6 @@ def assembleData(coreIndexObj, excelDataDic):
                 returnDataDic['current_core'] = core
                 # 核心指标不计算
                 returnDataDic['final_cal_core'] = coreIndexObj['final_cal_core']
-                print('数据表中的数据为空：' + coreIndexObj['code'])
             else:
                 if currentCore != core:
                     # 将current_core的数据赋值给period_core

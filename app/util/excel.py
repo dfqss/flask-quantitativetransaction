@@ -22,7 +22,7 @@ def readExcel(filePath: str, fileName: str,
         # 如果不存在则创建目录
         os.makedirs(filePath)
     # 拼接文件的全路径
-    fileFullPath = filePath + '\\' + fileName
+    fileFullPath = os.path.join(filePath, fileName)
     # 判断文件是否存在，不存在则返回异常信息
     if not os.path.isfile(fileFullPath):
         return 'Err', '文件:' + fileFullPath + '不存在'

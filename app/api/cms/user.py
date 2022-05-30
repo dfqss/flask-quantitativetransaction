@@ -48,7 +48,7 @@ user_api = Blueprint("user", __name__)
 
 
 @user_api.route("/register", methods=["POST"])
-@permission_meta(name="注册", module="用户", mount=False)
+@permission_meta(name="注册", module="用户", mount=True)
 @Logger(template="管理员新建了一个用户")  # 记录日志
 @admin_required
 @api.validate(
@@ -119,7 +119,7 @@ def login(json: LoginSchema):
 
 
 @user_api.route("", methods=["PUT"])
-@permission_meta(name="用户更新信息", module="用户", mount=False)
+@permission_meta(name="用户更新信息", module="用户", mount=True)
 @login_required
 @api.validate(
     tags=["用户"],
@@ -147,7 +147,7 @@ def update(json: UserBaseInfoSchema):
 
 
 @user_api.route("/change_password", methods=["PUT"])
-@permission_meta(name="修改密码", module="用户", mount=False)
+@permission_meta(name="修改密码", module="用户", mount=True)
 @Logger(template="{user.username}修改了自己的密码")  # 记录日志
 @login_required
 @api.validate(
@@ -169,7 +169,7 @@ def change_password(json: ChangePasswordSchema):
 
 
 @user_api.route("/information")
-@permission_meta(name="查询自己信息", module="用户", mount=False)
+@permission_meta(name="查询自己信息", module="用户", mount=True)
 @login_required
 @api.validate(
     tags=["用户"],
@@ -185,7 +185,7 @@ def get_information():
 
 
 @user_api.route("/refresh")
-@permission_meta(name="刷新令牌", module="用户", mount=False)
+@permission_meta(name="刷新令牌", module="用户", mount=True)
 @api.validate(
     resp=DocResponse(RefreshFailed, NotFound("refresh_token未被识别"), r=LoginTokenSchema),
     tags=["用户"],
@@ -209,7 +209,7 @@ def refresh():
 
 
 @user_api.route("/permissions")
-@permission_meta(name="查询自己拥有的权限", module="用户", mount=False)
+@permission_meta(name="查询自己拥有的权限", module="用户", mount=True)
 @login_required
 @api.validate(
     tags=["用户"],
