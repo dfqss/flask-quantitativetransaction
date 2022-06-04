@@ -28,7 +28,6 @@
 #     print(str(datetime.datetime.now()) + ' Job 4 executed')
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
 # import datetime
 from app.api.investmentV1.scheduler.tasking.batchFiles import readFile
@@ -41,42 +40,26 @@ app = Flask(__name__)
 # 加载配置
 app.config.from_object(DevelopmentConfig())
 
-# 创建全局的数据库连接对象，一个数据库连接对象下执行与同一个session
-job_conn1 = SQLAlchemy(app)
-job_conn2 = SQLAlchemy(app)
-
 # 获取定时器对象
 scheduler = APScheduler()
 
-# 核心指标文件地址
-path_coreIndex = DevelopmentConfig.BATCH_FILES_PATH_CORE_INDEX
 
-
-# 定时任务实现代码：预读excel文件
-@scheduler.task('interval', id='do_job_1', seconds=45, misfire_grace_time=900)
+# 定时任务实现代码：预读核心指标excel文件
+@scheduler.task('interval', id='do_job_1', seconds=180, misfire_grace_time=900)
 def read_core_index_excel():
     # 创建局部数据库对象
     # print(str(datetime.datetime.now()) + ' Job 1 executed')
     app.logger.info('Job 1 executed-读取核心指标文件')
-    try:
-        readFile(job_conn1, path_coreIndex)
-    except Exception as e:
-        app.logger.error('读取核心指标文件失败，开始事务回滚:' + str(e))
-        job_conn1.session.rollback()
+    readFile()
 
 
 # 定时任务实现代码：将excel数据导入数据库
-@scheduler.task('interval', id='do_job_2', seconds=180, misfire_grace_time=900)
+@scheduler.task('interval', id='do_job_2', seconds=10, misfire_grace_time=900)
 def import_core_index_data():
     # 创建局部数据库对象
     # print(str(datetime.datetime.now()) + ' Job 2 executed')
     app.logger.info('Job 2 executed-核心指标数据计算入库')
-    try:
-        createOrUpdateCoreIndex(job_conn2)
-        job_conn2.session.commit()
-    except Exception as e:
-        app.logger.error('核心指标数据入库失败:' + str(e))
-        job_conn2.session.rollback()
+    createOrUpdateCoreIndex()
 
 
 # 执行定时任务

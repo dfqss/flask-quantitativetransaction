@@ -24,6 +24,6 @@ class DevelopmentConfig(BaseConfig):
     # 开发环境
     BATCH_FILES_PATH_CORE_INDEX = r'C:\Users\thinkpad\Desktop\servers'
     # 生产环境
-    # BATCH_FILES_PATH_CORE_INDEX = '/home/mba/share/coreIndex'
+    # BATCH_FILES_PATH_CORE_INDEX = ['/home/mba/share/coreIndex', '/home/mba/share/otherIndex']
 
     pass

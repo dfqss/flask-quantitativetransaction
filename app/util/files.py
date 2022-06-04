@@ -16,14 +16,17 @@ def getFileNameList(path, suffix):
     return fileNameList
 
 
-# 批量修改文件名后缀：修改源文件
+# 批量修改文件名后缀：修改源文件(同时返回修改后的文件名称)
 def renameFilesSuffix(path, fileNameList, renameFromSuffix, renameToSuffix):
+    returnList = []
     for filename in fileNameList:
         oldFileName = os.path.join(path, filename)
         # oldFileName = path + '\\' + filename
         newFileName = os.path.join(path, filename.replace(renameFromSuffix, renameToSuffix))
         # newFileName = path + '\\' + filename.replace(renameFromSuffix, renameToSuffix)
         os.rename(oldFileName, newFileName)
+        returnList.append(newFileName)
+    return returnList
 
 
 # 批量修改文件名后缀：不修改源文件,返回一个文件名称的集合

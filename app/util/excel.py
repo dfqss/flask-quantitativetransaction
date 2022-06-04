@@ -16,7 +16,7 @@ def readExcel(filePath: str, fileName: str,
               sheetIndex: int = 0, startIndex: int = 0, keys: list = []):
     # 判断文件名是否为空，为空则返回异常信息
     if fileName.isspace():
-        return 'Err', '文件名为空'
+        raise Exception('文件名fileName为空')
     # 判断文件路径是否存在
     if not os.path.exists(filePath):
         # 如果不存在则创建目录
@@ -25,7 +25,7 @@ def readExcel(filePath: str, fileName: str,
     fileFullPath = os.path.join(filePath, fileName)
     # 判断文件是否存在，不存在则返回异常信息
     if not os.path.isfile(fileFullPath):
-        return 'Err', '文件:' + fileFullPath + '不存在'
+        raise Exception('文件:' + fileFullPath + '不存在')
     # 读取文件对象
     data = xlrd.open_workbook(fileFullPath)
     # 获取第一个工作薄
