@@ -17,3 +17,11 @@ class MbaDupontAnalysisIndex(InfoCrud):
 
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    @staticmethod
+    def key_to_list():
+        keys_list = [
+            'code', 'code_name', 'roe', 'assets_turn', 'dupont_np',
+            'profit_to_gr', 'dupont_tax_burden', 'dupont_int_burden', 'ebi_to_gr',
+        ]
+        return keys_list

@@ -32,6 +32,7 @@ from flask_apscheduler import APScheduler
 # import datetime
 from app.api.investmentV1.scheduler.tasking.batchFiles import readFile
 from app.api.investmentV1.scheduler.tasking.coreIndex import createOrUpdateCoreIndex
+from app.api.investmentV1.scheduler.tasking.otherIndex import createOrUpdateOtherIndex
 from app.config.development import DevelopmentConfig
 
 # 定义全局变量
@@ -44,22 +45,28 @@ app.config.from_object(DevelopmentConfig())
 scheduler = APScheduler()
 
 
-# 定时任务实现代码：预读核心指标excel文件
-@scheduler.task('interval', id='do_job_1', seconds=180, misfire_grace_time=900)
+# 定时任务实现代码：预读批量指标excel文件
+@scheduler.task('interval', id='do_job_1', seconds=60, misfire_grace_time=900)
 def read_core_index_excel():
-    # 创建局部数据库对象
     # print(str(datetime.datetime.now()) + ' Job 1 executed')
-    app.logger.info('Job 1 executed-读取核心指标文件')
+    app.logger.info('Job 1 executed-批量指标文件入库')
     readFile()
 
 
-# 定时任务实现代码：将excel数据导入数据库
-@scheduler.task('interval', id='do_job_2', seconds=10, misfire_grace_time=900)
+# 定时任务实现代码：将核心指标数据导入数据库
+@scheduler.task('interval', id='do_job_2', seconds=180, misfire_grace_time=900)
 def import_core_index_data():
-    # 创建局部数据库对象
     # print(str(datetime.datetime.now()) + ' Job 2 executed')
     app.logger.info('Job 2 executed-核心指标数据计算入库')
     createOrUpdateCoreIndex()
+
+
+# 定时任务实现代码：将财务分析指标数据导入数据库
+@scheduler.task('interval', id='do_job_3', seconds=80, misfire_grace_time=900)
+def import_other_index_data():
+    # print(str(datetime.datetime.now()) + ' Job 3 executed')
+    app.logger.info('Job 3 executed-读取批量指标文件数据')
+    createOrUpdateOtherIndex()
 
 
 # 执行定时任务

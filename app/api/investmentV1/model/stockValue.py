@@ -20,3 +20,12 @@ class MbaStockValue(InfoCrud):
 
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    @staticmethod
+    def key_to_list():
+        keys_list = [
+            'code', 'code_name', 'ev', 'mkt_cap_float', 'mkt_free_shares',
+            'pb_mrq', 'pb_lyr', 'gr_ttm', 'or_ttm', 'profit_ttm',
+            'eps_ttm', 'or_ps_ttm'
+        ]
+        return keys_list

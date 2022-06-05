@@ -1,4 +1,4 @@
-from app.api.investmentV1.model.coreIndex import MbaCoreIndex
+from app.api.investmentV1.model.coreIndex import MbaCoreIndex, MbaCoreIndexHist
 from app.api.investmentV1.model.batchFiles import MbaBatchFiles
 from app.util.excel import readExcel
 import datetime
@@ -22,23 +22,45 @@ conn = SQLAlchemy(app)
 
 # 批量创建或更新核心指数表
 def createOrUpdateCoreIndex():
-    keys = ['code', 'name', 'core']
+    # 获取要读取文件的信息
     file = get_file_names()
+    # 没有查询到要读取的文件直接返回
     if len(file) <= 0:
         app.logger.info('没有需要计算的核心指标数据')
         return
+    # 获取文件路径、文件名称和文件期数
     filePath = file[0][0]
     fileName = file[0][1]
-    # 1.将数据更新为：毫秒值-[读取中]
+    filePeriods = file[0][2]
+    # 将数据更新为：毫秒值-[读取中]
     update_batch_files_status(conn, fileName, str(round(time.time() * 1000)), '')
     try:
-        # 2.读取excel中核心指标信息对象列表
+        app.logger.info('------start 开始计算核心指数: ' + fileName)
+        # 1.读取excel中核心指标数据
+        keys = ['code', 'name', 'core']
         excelData = readExcel(filePath, fileName, 0, 2, keys)
-        # 3.查询核心指数表中的所有信息
-        coreIndexData = conn.session.query(MbaCoreIndex).all()
-        # 4.当核心指数表的数据不为空时：新增并更新核心指数表
+        # 2.判断文件名称中是否包含：REC8
+        # coreIndexData = []：这coreIndexData不是在if语句的主体范围内定义的局部变量，因此可以在if语句之后使用它
+        if 'REC8' in fileName:
+            app.logger.info('本次处理的是REC8文件: ' + fileName)
+            # 包含REC8:读取核心指标历史表中的数据
+            # 从文件名中获取期数
+            periods = fileName[fileName.index('REC8_')+5:fileName.index('_END8')]
+            coreIndexData = conn.session.query(MbaCoreIndexHist).filter(
+                and_(MbaCoreIndexHist.periods.__eq__(periods))).all()
+            # 如果查询的核心指标历史数据为空，则记录报错并返回
+            if len(coreIndexData) <= 0:
+                errMes = '核心指数历史表中不存在期数为[' + periods + ']的数据-核心指标文件名称：' + fileName
+                app.logger.info(errMes)
+                conn.session.rollback()
+                # 更新数据读取状态为：1-失败
+                update_batch_files_status(conn, fileName, '1', errMes)
+                return
+        else:
+            # 不包含REC8:查询核心指数表中的所有信息
+            coreIndexData = conn.session.query(MbaCoreIndex).all()
+        # 3.当核心指数表的数据不为空时：新增并更新核心指数表
         if len(coreIndexData) > 0:
-            app.logger.info('start------计算核心指标文件: ' + fileName)
             # 将上一期的数据原封不动插入到历史表中
             backup_hist()
             # 创建核心指数数据
@@ -49,10 +71,13 @@ def createOrUpdateCoreIndex():
             update_cal_date()
             # 更新展示次数
             update_show_times()
-            app.logger.info('end------计算核心指标文件: ' + fileName)
+            # 更新期数
+            update_periods(filePeriods)
+            app.logger.info('end------计算核心指数完成: ' + fileName)
         else:
             app.logger.info('start------首次初始化核心指标数据文件: ' + fileName)
             create_core_index(excelData, coreIndexData)
+            update_periods(filePeriods)
             app.logger.info('end------首次初始化核心指标数据文件完成')
         # 提交核心指标计算后的数据
         conn.session.commit()
@@ -69,10 +94,11 @@ def createOrUpdateCoreIndex():
 
 # 查询mba_batch_files表中需要写入的核心指标文件的路径和文件名
 def get_file_names():
-    slq = conn.session.query(MbaBatchFiles.file_path, MbaBatchFiles.file_name).\
-        filter(and_(MbaBatchFiles.file_name.startswith('HXZB'),
-                    # 根据字段排序加 -MbaBatchFiles.file_name是降序
-                    MbaBatchFiles.status.__eq__('0'))).order_by(MbaBatchFiles.file_name).limit(1)
+    # 根据字段排序加 -MbaBatchFiles.file_name是降序
+    slq = conn.session\
+        .query(MbaBatchFiles.file_path, MbaBatchFiles.file_name, MbaBatchFiles.file_periods)\
+        .filter(and_(MbaBatchFiles.file_name.startswith('HXZB'), MbaBatchFiles.status.__eq__('0')))\
+        .order_by(MbaBatchFiles.file_periods).limit(1)
     return slq.all()
 
 
@@ -148,6 +174,17 @@ def update_show_times():
     except Exception as e:
         app.logger.error('更新展示次数失败:' + str(e))
         raise Exception("更新展示次数失败")
+
+
+# 更新期数
+def update_periods(filePeriods):
+    app.logger.info('更新期数')
+    try:
+        sql = "update mba_core_index set periods = " + str(filePeriods)
+        conn.session.execute(sql)
+    except Exception as e:
+        app.logger.error('更新期数失败:' + str(e))
+        raise Exception("更新期数失败")
 
 
 # 组装数据

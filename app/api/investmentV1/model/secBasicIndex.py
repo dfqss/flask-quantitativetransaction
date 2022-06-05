@@ -15,3 +15,11 @@ class MbaSecBasicIndex(InfoCrud):
 
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    @staticmethod
+    def key_to_list():
+        keys_list = [
+            'code', 'code_name', 'total_shares', 'free_float_shares', 'share_issuing_mkt',
+            'rt_mkt_cap', 'rt_float_mkt_cap'
+        ]
+        return keys_list

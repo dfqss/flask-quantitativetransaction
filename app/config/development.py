@@ -19,11 +19,26 @@ class DevelopmentConfig(BaseConfig):
     # SQLALCHEMY_COMMIT_TEARDOWN = True
 
     """
-    核心指标文件上传路径
+    批量指标文件上传路径
     """
     # 开发环境
-    BATCH_FILES_PATH_CORE_INDEX = r'C:\Users\thinkpad\Desktop\servers'
-    # 生产环境
-    # BATCH_FILES_PATH_CORE_INDEX = ['/home/mba/share/coreIndex', '/home/mba/share/otherIndex']
+    BATCH_FILES_PATH = [
+        r'C:\Users\thinkpad\Desktop\servers\coreIndex',
+        r'C:\Users\thinkpad\Desktop\servers\finAnalysisIndex'
+    ]
 
+    # 生产环境
+    # BATCH_FILES_PATH = ['/home/mba/share/coreIndex', '/home/mba/share/otherIndex']
+
+    """
+    文件类型:
+        财务分析指标：CWFXZB
+        成长指标：CZZB
+        杜邦分析指标：DBFXZB
+        股票估值：GPGZ
+        技术分析指标：JSFXZB
+        行业分类：HYFL
+        证券基础指标：ZQJCZB
+    """
+    FILE_TYPES = ['CWFXZB', 'CZZB', 'DBFXZB', 'GPGZ', 'JSFXZB', 'HYFL', 'ZQJCZB']
     pass

@@ -14,3 +14,11 @@ class MbaIndustryClass(InfoCrud):
 
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    @staticmethod
+    def key_to_list():
+        keys_list = [
+            'code', 'code_name', 'industry_sw', 'industry_sw_code', 'industry_cit',
+            'industry_cit_code'
+        ]
+        return keys_list

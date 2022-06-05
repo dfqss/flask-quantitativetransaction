@@ -10,6 +10,7 @@ class MbaCoreIndex(InfoCrud):
     current_core = Column(String(20), nullable=False, comment='最新核心指标')
     period_core = Column(String(20), nullable=False, comment='次新核心指标')
     final_cal_core = Column(String(20), nullable=False, comment='最终计算核心指数')
+    periods = Column(Integer, comment='期数')
     status = Column(String(5), nullable=False, comment='展示状态：0-展示 1-不展示')
     show_times = Column(Integer, default=0, comment='展示次数')
     cal_date = Column(DateTime, nullable=False, comment='计算日期')
@@ -24,6 +25,7 @@ class MbaCoreIndex(InfoCrud):
             'current_core': self.current_core,
             'period_core': self.period_core,
             'final_cal_core': self.final_cal_core,
+            'periods': self.periods,
             'status': self.status,
             'show_times': self.show_times,
             'cal_date': self.cal_date,
@@ -40,6 +42,7 @@ class MbaCoreIndexHist(InfoCrud):
     current_core = Column(String(20), nullable=False, comment='最新核心指标')
     period_core = Column(String(20), nullable=False, comment='次新核心指标')
     final_cal_core = Column(String(20), nullable=False, comment='最终计算核心指数')
+    periods = Column(Integer, comment='期数', nullable=False)
     status = Column(String(5), nullable=False, comment='展示状态：0-展示 1-不展示')
     show_times = Column(Integer, default=0, comment='展示次数')
     cal_date = Column(DateTime, primary_key=True, comment='计算日期')
@@ -54,6 +57,7 @@ class MbaCoreIndexHist(InfoCrud):
             'current_core': self.current_core,
             'period_core': self.period_core,
             'final_cal_core': self.final_cal_core,
+            'periods': self.periods,
             'status': self.status,
             'show_times': self.show_times,
             'cal_date': self.cal_date,

@@ -9,7 +9,7 @@ class MbaFinAnalysisIndex(InfoCrud):
     code_name = Column(String(60), comment='股票名称')
     roe_avg = Column(String(30), comment='净资产收益率ROE(平均)')
     roe_basic = Column(String(30), comment='净资产收益率ROE(加权)')
-    roa = Column(String(30), comment='总资产净利率ROA报告期')
+    roa = Column(String(30), comment='总资产净利率ROA')
     gross_profit_margin = Column(String(30), comment='销售毛利率')
     net_profit_margin = Column(String(30), comment='销售净利率')
     tot_ope_rev = Column(String(30), comment='营业总收入[单位]元')
@@ -29,3 +29,13 @@ class MbaFinAnalysisIndex(InfoCrud):
 
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    @staticmethod
+    def key_to_list():
+        keys_list = [
+            'code', 'code_name', 'roe_avg', 'roe_basic', 'roa',
+            'gross_profit_margin', 'net_profit_margin', 'tot_ope_rev', 'ope_rev', 'goodwill',
+            'r_and_d_costs', 'segment_sales', 'debt_to_assets', 'cash_to_current_debt', 'pe',
+            'pb', 'gr_ps', 'or_ps', 'cf_ps', 'eps_basic', 'bps'
+        ]
+        return keys_list

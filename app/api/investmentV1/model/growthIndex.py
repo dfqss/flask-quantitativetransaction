@@ -29,3 +29,13 @@ class MbaGrowthIndex(InfoCrud):
 
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
+
+    @staticmethod
+    def key_to_list():
+        keys_list = [
+            'code', 'code_name', 'yoy_eps_basic', 'yoy_tr', 'yoy_or',
+            'yoy_op', 'yoy_ebt', 'yoy_profit', 'yoy_equity', 'fa_yoy',
+            'yoy_debt', 'yoy_assets_tb', 'yoy_bps', 'yoy_assets_hb', 'growth_gr',
+            'growth_gc', 'growth_or', 'growth_op', 'qfa_cgr_sales', 'qfa_cgr_op', 'qfa_cgr_profit'
+        ]
+        return keys_list
