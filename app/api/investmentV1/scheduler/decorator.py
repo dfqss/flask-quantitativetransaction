@@ -33,6 +33,7 @@ from flask_apscheduler import APScheduler
 from app.api.investmentV1.scheduler.tasking.batchFiles import readFile
 from app.api.investmentV1.scheduler.tasking.coreIndex import createOrUpdateCoreIndex
 from app.api.investmentV1.scheduler.tasking.otherIndex import createOrUpdateOtherIndex
+from app.api.investmentV1.scheduler.tasking.listingIndex import createOrUpdateListingDateIndex
 from app.config.development import DevelopmentConfig
 
 # 定义全局变量
@@ -67,6 +68,14 @@ def import_other_index_data():
     # print(str(datetime.datetime.now()) + ' Job 3 executed')
     app.logger.info('Job 3 executed-读取批量指标文件数据')
     createOrUpdateOtherIndex()
+
+
+# 定时任务实现代码：将财务分析指标数据导入数据库
+@scheduler.task('interval', id='do_job_4', seconds=15, misfire_grace_time=900)
+def import_listing_data():
+    # print(str(datetime.datetime.now()) + ' Job 3 executed')
+    app.logger.info('Job 4 executed-读取上市日期文件')
+    createOrUpdateListingDateIndex()
 
 
 # 执行定时任务
