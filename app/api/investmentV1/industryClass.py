@@ -3,9 +3,10 @@ from app.api.investmentV1.model.industryClass import MbaIndustryClass
 
 industryClass_api = Blueprint("industryClass", __name__)
 
-@industryClass_api.route("/getIndustryClass", methods=["post"])
+
+@industryClass_api.route("/getIndustryClassList", methods=["post"])
 # @login_required
-def getIndustryClass():
+def getIndustryClassList():
     params = request.json
     code = params.get('code')
     codeName = params.get('codeName')
@@ -14,13 +15,13 @@ def getIndustryClass():
     startIndex = (pageNum - 1) * pageSize
     # 拼接条件
     filterList = []
-    #根据股票代码查询
+    # 根据股票代码查询
     if code is not None and len(code.strip()) > 0:
         filterList.append(MbaIndustryClass.code == code)
-    #根据股票名称查询
+    # 根据股票名称查询
     if codeName is not None and len(codeName.strip()) > 0:
         filterList.append(MbaIndustryClass.code_name == codeName)
-    #分页查询
+    # 分页查询
     dataList = MbaIndustryClass.query.filter(*filterList) \
         .order_by(MbaIndustryClass.code) \
         .offset(startIndex).limit(pageSize).all()

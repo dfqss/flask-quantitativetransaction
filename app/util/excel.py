@@ -1,5 +1,6 @@
 import xlrd
 import os
+import datetime
 from itertools import zip_longest
 
 # *args是可变参数，args接收的是一个tuple；
@@ -37,3 +38,21 @@ def readExcel(filePath: str, fileName: str,
             continue
         dataList.append(dict(zip_longest(keys, sheet.row_values(i))))
     return dataList
+
+
+# 根据key值，将列表中所有符合条件的字典对应的value值转换成对应的类型
+def formatCellValue(formatList, key, dataType):
+    for formatDict in formatList:
+        if key in formatDict:
+            # 将数据转换成时间类型
+            if dataType == 'datetime':
+                # 第二个参数-dateMode:0是以1900-01-01为基准的日期, 1是1904-01-01为基准的日期
+                formatDict[key] = xlrd.xldate_as_datetime(formatDict[key], 0)
+                continue
+            if dataType == 'str':
+                # 添加你需要的代码
+                continue
+            if dataType == 'other':
+                # 添加你需要的代码
+                continue
+

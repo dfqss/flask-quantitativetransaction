@@ -1,13 +1,74 @@
+import decimal
 import os
 from itertools import groupby
 from operator import itemgetter
 import copy
 import datetime
+from dateutil import rrule
 
 
-# 获取当前系统时间的年月日时分秒
+# 获取当前系统时间的年月日时分秒(返回字符串对象) 返回格式-yyyymmdd
 def get_now_time_yyyymmdd():
     return datetime.datetime.now().strftime("%Y%m%d")
+
+
+# 获取月份差(返回Decimal类型) 传入格式-yy-mm-dd 返回：月份差
+def get_month_diff_d(startDate, endDate):
+    # 格式化起始日期:将字符串转换成datetime类型
+    if isinstance(startDate, str):
+        start_date = datetime.datetime.strptime(startDate, '%Y-%m-%d')
+    else:
+        start_date = startDate
+    # 格式化结束日期:将字符串转换成datetime类型
+    if isinstance(endDate, str):
+        end_date = datetime.datetime.strptime(endDate, '%Y-%m-%d')
+    else:
+        end_date = endDate
+    # 获取起始日期年、月、日
+    s_y = start_date.year
+    s_m = start_date.month
+    s_d = start_date.day
+    # 获取结束日期年、月、日
+    e_y = end_date.year
+    e_m = end_date.month
+    e_d = end_date.day
+    # 计算年、月、日各时间差
+    diff_y = e_y - s_y
+    diff_m = e_m - s_m
+    diff_d = e_d - s_d
+    # 最终计算出起始日期和结束日期的时间差
+    diff_info = diff_y * 12 + diff_m + (decimal.Decimal(str(diff_d)) / decimal.Decimal('31'))
+    return round(diff_info, 1)
+
+
+# 获取月份差(返回int类型) 传入格式-yy-mm-dd 返回：月份差
+def get_month_diff_i(startDate, endDate):
+    # 格式化起始日期:将字符串转换成datetime类型
+    if isinstance(startDate, str):
+        start_date = datetime.datetime.strptime(startDate, '%Y-%m-%d')
+    else:
+        start_date = startDate
+    # 格式化结束日期:将字符串转换成datetime类型
+    if isinstance(endDate, str):
+        end_date = datetime.datetime.strptime(endDate, '%Y-%m-%d')
+    else:
+        end_date = endDate
+    return rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date).count()
+
+
+# 获取两个日期差(返回int类型) 传入格式-yy-mm-dd 返回：日期差
+def get_day_diff(startDate, endDate):
+    # 格式化起始日期:将字符串转换成datetime类型
+    if isinstance(startDate, str):
+        start_date = datetime.datetime.strptime(startDate, '%Y-%m-%d')
+    else:
+        start_date = startDate
+    # 格式化结束日期:将字符串转换成datetime类型
+    if isinstance(endDate, str):
+        end_date = datetime.datetime.strptime(endDate, '%Y-%m-%d')
+    else:
+        end_date = endDate
+    return (end_date - start_date).days
 
 
 # 将一个字典列表的某一个key提炼出来，作为该数据的标识，并将其所在的数据列表作为value
