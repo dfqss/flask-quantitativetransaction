@@ -24,7 +24,8 @@ class DevelopmentConfig(BaseConfig):
     # 开发环境
     BATCH_FILES_PATH = [
         r'C:\Users\thinkpad\Desktop\servers\coreIndex',
-        r'C:\Users\thinkpad\Desktop\servers\finAnalysisIndex'
+        r'C:\Users\thinkpad\Desktop\servers\finAnalysisIndex',
+        r'C:\Users\thinkpad\Desktop\servers\listingDate'
     ]
 
     # 生产环境

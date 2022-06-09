@@ -67,10 +67,11 @@ def getCoreIndexHistoryList():
     params = request.json
     code = params.get('code')
     codeName = params.get('codeName')
+    calDate = params.get('calDate')
+    periods = params.get('periods')
     pageSize = params.get('pageSize', 10)
     pageNum = params.get('pageNum', 1)
     startIndex = (pageNum - 1) * pageSize
-    calDate = params.get('calDate')
     # 拼接查询条件
     filterList = []
     # 根据股票代码查询
@@ -80,20 +81,25 @@ def getCoreIndexHistoryList():
     if codeName is not None and len(codeName.strip()) > 0:
         filterList.append(MbaCoreIndexHist.code_name == codeName)
     # 根据时间戳查询
-    if calDate is not None:
-        filterList.append(func.date_format(calDate, "%Y-%m-%d") == func.date_format(MbaCoreIndexHist.cal_date, "%Y-%m-%d"))
+    if calDate is not None and len(calDate.strip()) > 0:
+        filterList.append(func.date_format(calDate, "%Y-%m-%d") ==
+                          func.date_format(MbaCoreIndexHist.cal_date, "%Y-%m-%d"))
+    # 根据期数查询
+    if periods is not None and len(periods.strip()) > 0:
+        filterList.append(MbaCoreIndexHist.periods == periods)
     # 分页查询
     pageData = db.session.query(MbaCoreIndexHist.code,
                                 MbaCoreIndexHist.code_name,
                                 MbaCoreIndexHist.final_cal_core,
                                 MbaCoreIndexHist.cal_date,
+                                MbaCoreIndexHist.periods,
                                 MbaListingDateCal.is_new_shares) \
         .outerjoin(MbaListingDateCal, MbaCoreIndexHist.code == MbaListingDateCal.code) \
         .filter(*filterList) \
-        .order_by(MbaCoreIndexHist.code) \
+        .order_by(MbaCoreIndexHist.periods, MbaCoreIndexHist.code) \
         .offset(startIndex).limit(pageSize).all()
     # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
-    mapList = ['code', 'codeName', 'finalCalCore', 'calDate', 'isNewShares']
+    mapList = ['code', 'codeName', 'finalCalCore', 'calDate', 'periods', 'isNewShares']
     dataList = []
     for returnData in pageData:
         dataList.append(dict(zip_longest(mapList, returnData)))
