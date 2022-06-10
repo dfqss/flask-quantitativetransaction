@@ -29,7 +29,10 @@ class DevelopmentConfig(BaseConfig):
     ]
 
     # 生产环境
-    # BATCH_FILES_PATH = ['/home/mba/share/coreIndex', '/home/mba/share/otherIndex']
+    # BATCH_FILES_PATH = [
+    #     '/home/mba/share/coreIndex',
+    #     '/home/mba/share/otherIndex'
+    # ]
 
     """
     文件类型:
