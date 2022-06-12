@@ -1,6 +1,8 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, Flask
 from app.api.investmentV1.model.stockValue import MbaStockValue
+from app.api.investmentV1.exception.result import success, failed
 
+app = Flask(__name__)
 stockValue_api = Blueprint("stockValue", __name__)
 
 
@@ -23,12 +25,17 @@ def getSecBasicIndexList():
     if codeName is not None and len(codeName.strip()) > 0:
         filterList.append(MbaStockValue.code_name == codeName)
     # 分页查询
-    dataList = MbaStockValue.query.filter(*filterList)\
-        .order_by(MbaStockValue.code)\
-        .offset(startIndex).limit(pageSize).all()
-    # 获取分页总条数
-    totalNum = MbaStockValue.query.filter(*filterList).count()
+    try:
+        dataList = MbaStockValue.query.filter(*filterList) \
+            .order_by(MbaStockValue.code) \
+            .offset(startIndex).limit(pageSize).all()
+        # 获取分页总条数
+        totalNum = MbaStockValue.query.filter(*filterList).count()
+    except Exception as e:
+        app.logger.error('查询股票估值信息失败:' + str(e))
+        return failed(10303)
     # 返回参数信息
+    successMap = success()
     returnDict = dict()
     returnDict['dataList'] = dataList
     returnDict['totalNum'] = totalNum
