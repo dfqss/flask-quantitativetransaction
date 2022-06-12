@@ -43,6 +43,7 @@ def getCoreIndexList():
         pageData = db.session.query(MbaCoreIndex.code,
                                     MbaCoreIndex.code_name,
                                     MbaCoreIndex.final_cal_core,
+                                    MbaCoreIndex.show_times,
                                     MbaCoreIndex.periods,
                                     MbaCoreIndex.cal_date,
                                     MbaListingDateCal.is_new_shares,
@@ -53,7 +54,7 @@ def getCoreIndexList():
             .order_by(MbaCoreIndex.code) \
             .offset(startIndex).limit(pageSize).all()
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
-        mapList = ['code', 'codeName', 'finalCalCore', 'periods',
+        mapList = ['code', 'codeName', 'finalCalCore', 'showTimes', 'periods',
                    'calDate', 'isNewShares', 'inPoolStatus']
         dataList = []
         for returnData in pageData:
@@ -61,7 +62,6 @@ def getCoreIndexList():
         # 获取分页总条数
         totalNum = MbaCoreIndex.query.filter(*filterList).count()
     except Exception as e:
-        db.session.rollback()
         app.logger.error('查询核心指数失败:' + str(e))
         return failed(10202)
     # 返回参数信息
@@ -77,6 +77,7 @@ def getCoreIndexList():
 # @login_required
 def getCoreIndexHistoryList():
     params = request.json
+    app.logger.info('start service getCoreIndexHistoryList------服务入参：' + str(params))
     code = params.get('code')
     codeName = params.get('codeName')
     calDate = params.get('calDate')
@@ -88,10 +89,10 @@ def getCoreIndexHistoryList():
     filterList = []
     # 根据股票代码查询
     if code is not None and len(code.strip()) > 0:
-        filterList.append(MbaCoreIndexHist.code == code)
+        filterList.append(MbaCoreIndexHist.code.startswith(code))
     # 根据股票名称查询
     if codeName is not None and len(codeName.strip()) > 0:
-        filterList.append(MbaCoreIndexHist.code_name == codeName)
+        filterList.append(MbaCoreIndexHist.code_name.startswith(codeName))
     # 根据时间戳查询
     if calDate is not None and len(calDate.strip()) > 0:
         filterList.append(func.date_format(calDate, "%Y-%m-%d") ==
@@ -99,29 +100,34 @@ def getCoreIndexHistoryList():
     # 根据期数查询
     if periods is not None and len(periods.strip()) > 0:
         filterList.append(MbaCoreIndexHist.periods == periods)
-    # 分页查询
-    pageData = db.session.query(MbaCoreIndexHist.code,
-                                MbaCoreIndexHist.code_name,
-                                MbaCoreIndexHist.final_cal_core,
-                                MbaCoreIndexHist.cal_date,
-                                MbaCoreIndexHist.periods,
-                                MbaListingDateCal.is_new_shares) \
-        .outerjoin(MbaListingDateCal, MbaCoreIndexHist.code == MbaListingDateCal.code) \
-        .filter(*filterList) \
-        .order_by(MbaCoreIndexHist.periods, MbaCoreIndexHist.code) \
-        .offset(startIndex).limit(pageSize).all()
-    # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
-    mapList = ['code', 'codeName', 'finalCalCore', 'calDate', 'periods', 'isNewShares']
-    dataList = []
-    for returnData in pageData:
-        dataList.append(dict(zip_longest(mapList, returnData)))
-    # 获取分页总条数
-    totalNum = MbaCoreIndexHist.query.filter(*filterList).count()
+    try:
+        # 分页查询
+        pageData = db.session.query(MbaCoreIndexHist.code,
+                                    MbaCoreIndexHist.code_name,
+                                    MbaCoreIndexHist.final_cal_core,
+                                    MbaCoreIndexHist.cal_date,
+                                    MbaCoreIndexHist.periods,
+                                    MbaListingDateCal.is_new_shares) \
+            .outerjoin(MbaListingDateCal, MbaCoreIndexHist.code == MbaListingDateCal.code) \
+            .filter(*filterList) \
+            .order_by(MbaCoreIndexHist.periods, MbaCoreIndexHist.code) \
+            .offset(startIndex).limit(pageSize).all()
+        # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
+        mapList = ['code', 'codeName', 'finalCalCore', 'calDate', 'periods', 'isNewShares']
+        dataList = []
+        for returnData in pageData:
+            dataList.append(dict(zip_longest(mapList, returnData)))
+        # 获取分页总条数
+        totalNum = MbaCoreIndexHist.query.filter(*filterList).count()
+    except Exception as e:
+        app.logger.error('查询核心指数历史数据失败:' + str(e))
+        return failed(10204)
     # 返回参数信息
-    returnDict = dict()
-    returnDict['dataList'] = dataList
-    returnDict['totalNum'] = totalNum
-    return returnDict
+    successMap = success()
+    successMap['dataList'] = dataList
+    successMap['totalNum'] = totalNum
+    app.logger.info('end service getCoreIndexHistoryList------服务出参：' + str(successMap))
+    return successMap
 
 
 # 根据股票编码：code查询核心指数信息
