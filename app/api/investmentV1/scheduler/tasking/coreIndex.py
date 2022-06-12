@@ -84,7 +84,7 @@ def createOrUpdateCoreIndex():
         # 更新数据读取状态为：2-成功
         update_batch_files_status(conn, fileName, '2', '')
     except Exception as e:
-        app.logger.info('读取核心指标文件失败 [' + str(e) + ']')
+        app.logger.error('读取核心指标文件失败 [' + str(e) + ']')
         conn.session.rollback()
         # 更新数据读取状态为：1-失败
         update_batch_files_status(conn, fileName, '1', str(e))
