@@ -1,6 +1,8 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, Flask
 from app.api.investmentV1.model.tecAnalysisIndex import MbaTecAnalysisIndex
+from app.api.investmentV1.exception.result import success, failed
 
+app = Flask(__name__)
 tecAnalysisIndex_api = Blueprint("tecAnalysisIndex", __name__)
 
 
@@ -23,12 +25,17 @@ def getTecAnalysisIndexList():
     if codeName is not None and len(codeName.strip()) > 0:
         filterList.append(MbaTecAnalysisIndex.code_name == codeName)
     # 分页查询
-    dataList = MbaTecAnalysisIndex.query.filter(*filterList)\
-        .order_by(MbaTecAnalysisIndex.code)\
-        .offset(startIndex).limit(pageSize).all()
-    # 获取分页总条数
-    totalNum = MbaTecAnalysisIndex.query.filter(*filterList).count()
+    try:
+        dataList = MbaTecAnalysisIndex.query.filter(*filterList) \
+            .order_by(MbaTecAnalysisIndex.code) \
+            .offset(startIndex).limit(pageSize).all()
+        # 获取分页总条数
+        totalNum = MbaTecAnalysisIndex.query.filter(*filterList).count()
+    except Exception as e:
+        app.logger.error('查询技术分析指标失败:' + str(e))
+        return failed(10304)
     # 返回参数信息
+    successMap = success()
     returnDict = dict()
     returnDict['dataList'] = dataList
     returnDict['totalNum'] = totalNum

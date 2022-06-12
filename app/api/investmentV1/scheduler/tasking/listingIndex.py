@@ -28,7 +28,7 @@ def createOrUpdateListingDateCal():
     if len(file) <= 0:
         app.logger.info('没有需要计算上市日期数据')
         return
-    # 获取文件路径、文件名称和文件期数
+    # 获取文件路径、文件名称
     filePath = file[0][0]
     fileName = file[0][1]
     # 将数据更新为：毫秒值-[读取中]

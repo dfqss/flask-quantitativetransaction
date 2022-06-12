@@ -1,13 +1,16 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, Flask
+from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.industryClass import MbaIndustryClass
 
+app = Flask(__name__)
 industryClass_api = Blueprint("industryClass", __name__)
 
-
+#行业分类
 @industryClass_api.route("/getIndustryClassList", methods=["post"])
 # @login_required
 def getIndustryClassList():
     params = request.json
+    app.logger.info('start service getStockPoolList------服务入参：' + str(params))
     code = params.get('code')
     codeName = params.get('codeName')
     pageSize = params.get('pageSize', 10)
@@ -22,14 +25,18 @@ def getIndustryClassList():
     if codeName is not None and len(codeName.strip()) > 0:
         filterList.append(MbaIndustryClass.code_name == codeName)
     # 分页查询
-    dataList = MbaIndustryClass.query.filter(*filterList) \
-        .order_by(MbaIndustryClass.code) \
-        .offset(startIndex).limit(pageSize).all()
-    # 获取分页总条数
-    totalNum = MbaIndustryClass.query.filter(*filterList).count()
+    try:
+        dataList = MbaIndustryClass.query.filter(*filterList) \
+            .order_by(MbaIndustryClass.code) \
+            .offset(startIndex).limit(pageSize).all()
+        # 获取分页总条数
+        totalNum = MbaIndustryClass.query.filter(*filterList).count()
+    except Exception as e:
+        app.logger.error('查询行业分类失败:' + str(e))
+        return failed(10301)
     # 返回参数信息
+    successMap = success()
     returnDict = dict()
     returnDict['dataList'] = dataList
     returnDict['totalNum'] = totalNum
     return returnDict
-
