@@ -11,7 +11,7 @@ class DevelopmentConfig(BaseConfig):
     数据库配置 当此处不配置时，自动会读取[.env]中的数据库配置信息
     """
     # 开发环境
-    # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:123456@localhost:3306/lin_cmsflask1'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost:3306/lin_cmsflask'
 
     # 生产环境
     # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://mba:!IDy_7)ZA-U3@localhost:3311/mba'
@@ -23,9 +23,9 @@ class DevelopmentConfig(BaseConfig):
     """
     # 开发环境
     BATCH_FILES_PATH = [
-        r'C:\Users\thinkpad\Desktop\servers\coreIndex',
-        r'C:\Users\thinkpad\Desktop\servers\finAnalysisIndex',
-        r'C:\Users\thinkpad\Desktop\servers\listingDate'
+        r'C:\Users\29686\Desktop\service\other',
+        r'C:\Users\29686\Desktop\service\finAnalysisIndex',
+        r'C:\Users\29686\Desktop\service\listingDate'
     ]
 
     # 生产环境

@@ -35,13 +35,14 @@ def getStockPoolList():
                                     MbaStockPool.code_name,
                                     MbaStockPool.periods,
                                     MbaStockPool.create_time,
+                                    MbaStockPool.remark,
                                     MbaIndustryClass.industry_sw,
                                     MbaIndustryClass.industry_cit) \
             .outerjoin(MbaIndustryClass, MbaStockPool.code == MbaIndustryClass.code) \
             .filter(*filterList).order_by(MbaStockPool.code) \
             .offset(startIndex).limit(pageSize).all()
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
-        mapList = ['code', 'codeName', 'periods', 'create_time', 'industry_sw', 'industry_cit']
+        mapList = ['code', 'codeName', 'periods', 'create_time', 'remark', 'industry_sw', 'industry_cit']
         dataList = []
         for returnData in pageData:
             dataList.append(dict(zip_longest(mapList, returnData)))
@@ -81,3 +82,27 @@ def batchInsertStockPool():
         db.session.close()
     app.logger.info('end service batchInsertStockPool------服务出参：' + str(params))
     return success(16)
+
+
+# 修改股票池股票备注
+@StockPool_api.route("/updateStockPoolByCode", methods=["post"])
+# @login_required
+def updateStockPoolByCode():
+    params = request.json
+    app.logger.info('start service updateStockPoolByCode------服务入参：' + str(params))
+    code = params.get('code')
+    remark = params.get('remark')
+    try:
+        value = [{"code": code, "remark": remark}]
+        sql = "update mba_stock_pool set remark = :remark " \
+              "where code = :code"
+        db.session.execute(sql, value)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error('修改股票池股票备注失败:' + str(e))
+        return failed(10305)
+    finally:
+        db.session.close()
+    app.logger.info('end service updateStockPoolByCode------服务出参：' + str(params))
+    return success(100)
