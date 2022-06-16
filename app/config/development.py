@@ -45,4 +45,19 @@ class DevelopmentConfig(BaseConfig):
         证券基础指标：ZQJCZB
     """
     FILE_TYPES = ['CWFXZB', 'CZZB', 'DBFXZB', 'GPGZ', 'JSFXZB', 'HYFL', 'ZQJCZB']
+
+    """
+    文件类型与目录映射关系:
+    """
+    UPLOAD_FILES_MAP = {
+        'HXZB-AQJS': r'C:\Users\thinkpad\Desktop\servers\coreIndex',
+        'HXZB-REC8': r'C:\Users\thinkpad\Desktop\servers\coreIndex',
+        'CWFXZB': r'C:\Users\thinkpad\Desktop\servers\finAnalysisIndex',
+        'CZZB': r'C:\Users\thinkpad\Desktop\servers\growthIndex',
+        'DBFXZB': r'C:\Users\thinkpad\Desktop\servers\dupontAnalysisIndex',
+        'GPGZ': r'C:\Users\thinkpad\Desktop\servers\stockValue',
+        'JSFXZB': r'C:\Users\thinkpad\Desktop\servers\tecAnalysisIndex',
+        'HYFL': r'C:\Users\thinkpad\Desktop\servers\industryClass',
+        'ZQJCZB': r'C:\Users\thinkpad\Desktop\servers\secBasicIndex',
+    }
     pass
