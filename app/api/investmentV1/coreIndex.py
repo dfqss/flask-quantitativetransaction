@@ -6,6 +6,7 @@ from app.api.investmentV1.model.coreIndex import MbaCoreIndex
 from app.api.investmentV1.model.coreIndex import MbaCoreIndexHist
 from app.api.investmentV1.model.listingDateCal import MbaListingDateCal
 from app.api.investmentV1.model.stockPool import MbaStockPool
+from app.util.common import addFieldByConditions
 # end 模型必须引用后才能在数据库初始化对应表
 from sqlalchemy import func
 from lin import db
@@ -64,6 +65,8 @@ def getCoreIndexList():
     except Exception as e:
         app.logger.error('查询核心指数失败:' + str(e))
         return failed(10202)
+    # 添加资本市场指标
+    dataList = addFieldByConditions(dataList)
     # 返回参数信息
     successMap = success()
     successMap['dataList'] = dataList

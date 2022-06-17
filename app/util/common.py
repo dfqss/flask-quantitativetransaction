@@ -108,4 +108,45 @@ def filterNewDictList(orgList, filter, key):
     return returnList
 
 
+# # 给返回数据新增一个字段
+# def addFieldByCondition(dataList, condition, field):
+#     returnList = []
+#     if len(dataList) <= 0 and field != "" and condition != "":
+#         return returnList
+#     for date in dataList:
+#         addFlag = True
+#         if not isinstance(date, dict):
+#             date = date.to_dict()
+#         if(condition):
+#             date[field] = field
+#     pass
+
+
+# 给返回数据新增一个字段
+def addFieldByConditions(dataList):
+    returnList = []
+    if len(dataList) <= 0:
+        return returnList
+    for date in dataList:
+        if not isinstance(date, dict):
+            date = date.to_dict()
+        strCode = date['code'][0:3]
+        if strCode == '600':
+            date['capitalMarket'] = '上主板'
+        elif strCode == '000':
+            date['capitalMarket'] = '深主板'
+        elif strCode == '002':
+            date['capitalMarket'] = '中主板'
+        elif strCode == '300':
+            date['capitalMarket'] = '创业板'
+        elif strCode == '688':
+            date['capitalMarket'] = '科技板'
+        elif strCode.startswith('8', 0, 1):
+            date['capitalMarket'] = '京市A股'
+        else:
+            date['capitalMarket'] = ''
+        returnList.append(date)
+    return returnList
+
+
 basedir = os.getcwd()

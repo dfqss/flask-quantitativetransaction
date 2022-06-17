@@ -3,6 +3,7 @@ from flask import Blueprint, request, Flask
 from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.stockPool import MbaStockPool
 from app.api.investmentV1.model.industryClass import MbaIndustryClass
+from app.util.common import addFieldByConditions
 from lin import db
 from itertools import zip_longest
 
@@ -51,6 +52,8 @@ def getStockPoolList():
     except Exception as e:
         app.logger.error('查询股票池信息失败:' + str(e))
         return failed(10203)
+    # 添加资本市场指标
+    dataList = addFieldByConditions(dataList)
     # 返回参数信息
     successMap = success()
     successMap['dataList'] = dataList
