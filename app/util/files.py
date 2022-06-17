@@ -35,3 +35,8 @@ def modifyFilesSuffix(fileNameList, modifyFromSuffix, modifyToSuffix):
     for filename in fileNameList:
         returnList.append(filename.replace(modifyFromSuffix, modifyToSuffix))
     return returnList
+
+
+# 修改文件名后缀：不修改源文件,返回一个文件名称(字符串)
+def modifyFileSuffix(fileName, modifyFromSuffix, modifyToSuffix):
+    return fileName.replace(modifyFromSuffix, modifyToSuffix)
