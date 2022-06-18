@@ -34,6 +34,15 @@ def uploadFile():
     if fileType is None or len(fileType.strip()) <= 0:
         app.logger.error('上传的文件类型为空' + str(files))
         return failed(10208)
+    # 核心指标-往期重算相关校验
+    if fileType == 'REC8':
+        if periods is None:
+            app.logger.error('期数不能为空' + str(files))
+            return failed(10211)
+        if periods.startswith('0') or not periods.isdigit():
+            app.logger.error('期数只能为非零正整数' + str(files))
+            return failed(10212)
+    # 判断当前文件类型是否在可上传范围内
     if fileType in upload_files_map:
         filePath = upload_files_map.get(fileType)
         fileName = get_file_name(fileType, periods, '.xlsx')
