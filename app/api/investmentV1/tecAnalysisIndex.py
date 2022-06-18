@@ -36,7 +36,6 @@ def getTecAnalysisIndexList():
         return failed(10304)
     # 返回参数信息
     successMap = success()
-    returnDict = dict()
-    returnDict['dataList'] = dataList
-    returnDict['totalNum'] = totalNum
-    return returnDict
+    successMap['dataList'] = dataList
+    successMap['totalNum'] = totalNum
+    return successMap
