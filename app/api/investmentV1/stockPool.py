@@ -62,7 +62,7 @@ def getStockPoolList():
     return successMap
 
 
-# 查询股票池
+# 批量插入股票池
 @StockPool_api.route("/batchInsertStockPool", methods=["post"])
 # @login_required
 def batchInsertStockPool():
@@ -109,3 +109,25 @@ def updateStockPoolByCode():
         db.session.close()
     app.logger.info('end service updateStockPoolByCode------服务出参：' + str(params))
     return success(100)
+
+
+# 批量删除股票池
+@StockPool_api.route("/batchDeleteStockPool", methods=["post"])
+# @login_required
+def batchDeleteStockPool():
+    params = request.json
+    app.logger.info('start service batchDeleteStockPool------服务入参：' + str(params))
+    deleteData = params.get('deleteData')
+    try:
+        if len(deleteData) > 0:
+            sql = "delete from mba_stock_pool where code = :code"
+            db.session.execute(sql, deleteData)
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error('批量删除股票池:' + str(e))
+        return failed(10306)
+    finally:
+        db.session.close()
+    app.logger.info('end service batchDeleteStockPool------服务出参：' + str(params))
+    return success(101)
