@@ -133,6 +133,25 @@ def getCoreIndexHistoryList():
     return successMap
 
 
+# 查询核心指数历史记录分页查询
+@coreIndex_api.route("/validatePeriods", methods=["post"])
+# @login_required
+def validatePeriods():
+    params = request.json
+    app.logger.info('start service validatePeriods------服务入参：' + str(params))
+    periods = params.get('periods')
+    try:
+        if MbaCoreIndexHist.query.filter_by(periods=periods).count() < 1:
+            return failed(10213)
+    except Exception as e:
+        app.logger.error('查询核心指数历史数据失败:' + str(e))
+        return failed(10204)
+    # 返回参数信息
+    successMap = success(18)
+    app.logger.info('end service validatePeriods------服务出参：' + str(successMap))
+    return successMap
+
+
 # 根据股票编码：code查询核心指数信息
 @coreIndex_api.route('/<id>', methods=['GET'])
 def get_coreIndex(id):

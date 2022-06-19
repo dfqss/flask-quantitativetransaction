@@ -49,7 +49,6 @@ scheduler = APScheduler()
 # 定时任务实现代码：预读批量指标excel文件
 @scheduler.task('interval', id='do_job_1', seconds=180, misfire_grace_time=900)
 def read_core_index_excel():
-    # print(str(datetime.datetime.now()) + ' Job 1 executed')
     app.logger.info('Job 1 executed-批量指标文件入库')
     readFile()
 
@@ -57,7 +56,6 @@ def read_core_index_excel():
 # 定时任务实现代码：将核心指标数据导入数据库
 @scheduler.task('interval', id='do_job_2', seconds=180, misfire_grace_time=900)
 def import_core_index_data():
-    # print(str(datetime.datetime.now()) + ' Job 2 executed')
     app.logger.info('Job 2 executed-核心指标数据计算入库')
     createOrUpdateCoreIndex()
 
@@ -65,7 +63,6 @@ def import_core_index_data():
 # 定时任务实现代码：将财务分析指标数据导入数据库
 @scheduler.task('interval', id='do_job_3', seconds=80, misfire_grace_time=900)
 def import_other_index_data():
-    # print(str(datetime.datetime.now()) + ' Job 3 executed')
     app.logger.info('Job 3 executed-读取批量指标文件数据')
     createOrUpdateOtherIndex()
 
@@ -73,7 +70,6 @@ def import_other_index_data():
 # 定时任务实现代码：将财务分析指标数据导入数据库
 @scheduler.task('interval', id='do_job_4', seconds=30, misfire_grace_time=900)
 def import_listing_data():
-    # print(str(datetime.datetime.now()) + ' Job 3 executed')
     app.logger.info('Job 4 executed-读取上市日期文件')
     createOrUpdateListingDateCal()
 
