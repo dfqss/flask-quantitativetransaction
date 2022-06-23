@@ -1,6 +1,7 @@
 from flask import Blueprint, request, Flask
 from app.api.investmentV1.model.tecAnalysisIndex import MbaTecAnalysisIndex
 from app.api.investmentV1.exception.result import success, failed
+from lin import db
 
 app = Flask(__name__)
 tecAnalysisIndex_api = Blueprint("tecAnalysisIndex", __name__)
@@ -38,4 +39,31 @@ def getTecAnalysisIndexList():
     successMap = success()
     successMap['dataList'] = dataList
     successMap['totalNum'] = totalNum
+    return successMap
+
+
+# 根据code值更新LON和buying
+@tecAnalysisIndex_api.route('/updateTecAnalysisIndexByCode', methods=["POST"])
+def updateTecAnalysisIndexByCode():
+    params = request.json
+    app.logger.info('start service updateTecAnalysisIndexByCode------服务入参：' + str(params))
+    dicaDate = params.get("date")
+    app.logger.info(dicaDate)
+    # 定义空字典，用来判断
+    addList = {}
+    if not isinstance(dicaDate, dict):
+        dicaDate = dicaDate.to_dict()
+    if dicaDate['LON'] is not None and len(dicaDate['LON'].strip()) > 0:
+        addList['LON'] = dicaDate['LON']
+    if dicaDate['buying'] is not None and len(dicaDate['buying'].strip()) > 0:
+        addList['buying'] = dicaDate['buying']
+    try:
+        queryDate = MbaTecAnalysisIndex.query.filter_by(code=dicaDate["code"]).update(addList)
+        db.session.commit()
+    except Exception as e:
+        app.logger.error('根据code值更新LON和buying失败:' + str(e))
+        return failed(10308)
+    # 返回参数信息
+    successMap = success()
+    app.logger.info('end service updateTecAnalysisIndexByCode------服务出参：' + str(successMap))
     return successMap

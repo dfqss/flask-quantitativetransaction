@@ -12,6 +12,7 @@ from sqlalchemy import func
 from lin import db
 from itertools import zip_longest
 from sqlalchemy import or_, and_, not_
+
 # from flask import jsonify
 
 app = Flask(__name__)
@@ -189,3 +190,24 @@ def get_coreIndexByPage(page, limit):
     for dataList in pageData:
         returnData.append(dict(zip_longest(mapList, dataList)))
     return returnData
+
+
+# 根据code值删除核心指标
+@coreIndex_api.route('/updateCoreIndexByCode', methods=["POST"])
+def updateCoreIndexByCode():
+    params = request.json
+    app.logger.info('start service updateCoreIndexByCode------服务入参：' + str(params))
+    dicaDate = params.get("date")
+    app.logger.info(dicaDate)
+    if not isinstance(dicaDate, dict):
+        dicaDate = dicaDate.to_dict()
+    try:
+        MbaCoreIndex.query.filter_by(code=dicaDate["code"]).update({"status": "2"})
+        db.session.commit()
+    except Exception as e:
+        app.logger.error('根据code值删除核心指标失败:' + str(e))
+        return failed(10307)
+    # 返回参数信息
+    successMap = success()
+    app.logger.info('end service updateCoreIndexByCode------服务出参：' + str(successMap))
+    return successMap

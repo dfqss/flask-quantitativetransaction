@@ -11,6 +11,8 @@ class MbaTecAnalysisIndex(InfoCrud):
     breakout_ma = Column(String(20), comment='向上有效突破均线')
     breakdown_ma = Column(String(20), comment='向下有效突破均线')
     bull_bear_ma = Column(String(20), comment='均线多空头排列看涨看跌')
+    LON = Column(String(20), comment='LON')
+    buying = Column(String(20), comment='是否买入')
 
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
@@ -18,6 +20,6 @@ class MbaTecAnalysisIndex(InfoCrud):
     @staticmethod
     def key_to_list():
         keys_list = [
-            'code', 'code_name', 'tech_bias5', 'breakout_ma', 'breakdown_ma', 'bull_bear_ma'
+            'code', 'code_name', 'tech_bias5', 'breakout_ma', 'breakdown_ma', 'bull_bear_ma', 'LON', 'buying'
         ]
         return keys_list
