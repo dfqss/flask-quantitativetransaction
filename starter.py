@@ -91,6 +91,7 @@ if app.config.get("ENV") != "production":
 """
 executeJob()
 
+
 if __name__ == "__main__":
     app.logger.warning(
         """
@@ -99,4 +100,4 @@ if __name__ == "__main__":
         ----------------------------
         """
     )
-    app.run()
+    app.run(use_reloader=False)

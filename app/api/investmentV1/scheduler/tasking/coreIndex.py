@@ -23,7 +23,11 @@ conn = SQLAlchemy(app)
 # 批量创建或更新核心指数表
 def createOrUpdateCoreIndex():
     # 获取要读取文件的信息
-    file = get_file_names()
+    try:
+        file = get_file_names()
+    except Exception as e:
+        app.logger.info('获取核心指标文件名称失败！' + str(e))
+        return
     # 没有查询到要读取的文件直接返回
     if len(file) <= 0:
         app.logger.info('没有需要计算的核心指标数据')
@@ -225,7 +229,7 @@ def assembleData(coreIndexObj, excelDataDic):
                     # 将计算结果赋值给final_cal_core
                     returnDataDic['final_cal_core'] = finalCalCore
                     # 将计算结果小于 -0.1 的status状态修改成：0-展示  否则修改成：1-不展示
-                    if float(finalCalCore) < -0.1:
+                    if float(finalCalCore) <= -0.1:
                         returnDataDic['status'] = 0
                     else:
                         returnDataDic['status'] = 1
