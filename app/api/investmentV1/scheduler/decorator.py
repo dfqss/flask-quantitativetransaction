@@ -78,8 +78,11 @@ def import_listing_data():
 def executeJob():
     # it is also possible to enable the API directly
     # scheduler.api_enabled = True
-    scheduler.init_app(app)
-    scheduler.start()
+    try:
+        scheduler.init_app(app)
+        scheduler.start()
+    except Exception as e:
+        app.logger.info('定时任务启动失败：' + str(e))
 
 
 # 测试函数
