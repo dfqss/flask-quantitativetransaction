@@ -41,7 +41,7 @@ def createOrUpdateListingDateCal():
         # 将ipo_date的值转换成datetime类型
         formatCellValue(excelData, 'ipo_date', 'datetime')
         # 2.查询数据库
-        queryList = conn.session.query(MbaListingDateCal.code).all()
+        queryList = conn.session.query(MbaListingDateCal).all()
         # 3.如果查询数据为空则进行数据初始化
         if len(queryList) <= 0:
             app.logger.info('start------首次初始化上市日期表数据: ' + fileName)

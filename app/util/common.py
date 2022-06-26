@@ -108,20 +108,6 @@ def filterNewDictList(orgList, filter, key):
     return returnList
 
 
-# # 给返回数据新增一个字段
-# def addFieldByCondition(dataList, condition, field):
-#     returnList = []
-#     if len(dataList) <= 0 and field != "" and condition != "":
-#         return returnList
-#     for date in dataList:
-#         addFlag = True
-#         if not isinstance(date, dict):
-#             date = date.to_dict()
-#         if(condition):
-#             date[field] = field
-#     pass
-
-
 # 给返回数据新增一个字段
 def addFieldByConditions(dataList):
     returnList = []

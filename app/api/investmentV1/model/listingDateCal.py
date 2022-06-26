@@ -13,6 +13,17 @@ class MbaListingDateCal(InfoCrud):
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
 
+    def to_dict(self):
+        listing_date = {
+            'code': self.code,
+            'is_new_shares': self.is_new_shares,
+            'listing_day': self.listing_day,
+            'ipo_date': self.ipo_date,
+            'create_time': self.create_time,
+            'update_time': self.update_time
+        }
+        return listing_date
+
 
 # 股票上市日期
 class MbaShares(InfoCrud):
