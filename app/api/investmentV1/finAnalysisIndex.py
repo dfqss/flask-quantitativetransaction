@@ -1,4 +1,5 @@
 from flask import Blueprint, request, Flask
+from lin import login_required
 
 from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.finAnalysisIndex import MbaFinAnalysisIndex
@@ -10,7 +11,7 @@ finAnalysisIndex_api = Blueprint("finAnalysisIndex", __name__)
 
 # 查询财务分析指标（盈利指标和每股指标）列表
 @finAnalysisIndex_api.route("/getFinAnalysisIndexList", methods=["post"])
-# @login_required
+@login_required
 def getFinAnalysisIndexList():
     params = request.json
     app.logger.info('start service getFinAnalysisIndexList------服务入参：' + str(params))

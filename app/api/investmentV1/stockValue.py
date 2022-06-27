@@ -1,4 +1,6 @@
 from flask import Blueprint, request, Flask
+from lin import login_required
+
 from app.api.investmentV1.model.stockValue import MbaStockValue
 from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.coreIndex import MbaCoreIndex
@@ -9,7 +11,7 @@ stockValue_api = Blueprint("stockValue", __name__)
 
 # 查询股票估值列表
 @stockValue_api.route("/getStockValueList", methods=["post"])
-# @login_required
+@login_required
 def getSecBasicIndexList():
     params = request.json
     code = params.get('code')

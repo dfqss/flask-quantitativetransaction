@@ -1,7 +1,7 @@
 from flask import Blueprint, request, Flask
 from app.api.investmentV1.model.tecAnalysisIndex import MbaTecAnalysisIndex
 from app.api.investmentV1.exception.result import success, failed
-from lin import db
+from lin import db, login_required, permission_meta, group_required
 
 app = Flask(__name__)
 tecAnalysisIndex_api = Blueprint("tecAnalysisIndex", __name__)
@@ -9,7 +9,7 @@ tecAnalysisIndex_api = Blueprint("tecAnalysisIndex", __name__)
 
 # 查询技术分析指标列表
 @tecAnalysisIndex_api.route("/getTecAnalysisIndexList", methods=["post"])
-# @login_required
+@login_required
 def getTecAnalysisIndexList():
     params = request.json
     code = params.get('code')
@@ -44,6 +44,9 @@ def getTecAnalysisIndexList():
 
 # 根据code值更新LON和buying
 @tecAnalysisIndex_api.route('/updateTecAnalysisIndexByCode', methods=["POST"])
+@permission_meta(name="根据code值更新LON和buying", module="技术分析指标", mount=True)
+@group_required
+@login_required
 def updateTecAnalysisIndexByCode():
     params = request.json
     app.logger.info('start service updateTecAnalysisIndexByCode------服务入参：' + str(params))
@@ -58,7 +61,7 @@ def updateTecAnalysisIndexByCode():
     if dicaDate['buying'] is not None and len(dicaDate['buying'].strip()) > 0:
         addList['buying'] = dicaDate['buying']
     try:
-        queryDate = MbaTecAnalysisIndex.query.filter_by(code=dicaDate["code"]).update(addList)
+        MbaTecAnalysisIndex.query.filter_by(code=dicaDate["code"]).update(addList)
         db.session.commit()
     except Exception as e:
         app.logger.error('根据code值更新LON和buying失败:' + str(e))

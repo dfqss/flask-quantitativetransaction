@@ -3,7 +3,7 @@ from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.secBasicIndex import MbaSecBasicIndex
 from app.util.common import addFieldByConditions
 from itertools import zip_longest
-from lin import db
+from lin import db, login_required
 from app.api.investmentV1.model.coreIndex import MbaCoreIndex
 
 app = Flask(__name__)
@@ -12,7 +12,7 @@ secBasicIndex_api = Blueprint("secBasicIndex", __name__)
 
 # 查询证券基础指标列表
 @secBasicIndex_api.route("/getSecBasicIndexList", methods=["post"])
-# @login_required
+@login_required
 def getSecBasicIndexList():
     params = request.json
     code = params.get('code')

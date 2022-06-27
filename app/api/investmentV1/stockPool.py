@@ -4,7 +4,7 @@ from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.stockPool import MbaStockPool
 from app.api.investmentV1.model.industryClass import MbaIndustryClass
 from app.util.common import addFieldByConditions
-from lin import db
+from lin import db, login_required, permission_meta, group_required
 from itertools import zip_longest
 
 app = Flask(__name__)
@@ -13,7 +13,7 @@ StockPool_api = Blueprint("stockPool", __name__)
 
 # 查询股票池
 @StockPool_api.route("/getStockPoolList", methods=["post"])
-# @login_required
+@login_required
 def getStockPoolList():
     params = request.json
     app.logger.info('start service getStockPoolList------服务入参：' + str(params))
@@ -64,7 +64,10 @@ def getStockPoolList():
 
 # 批量插入股票池
 @StockPool_api.route("/batchInsertStockPool", methods=["post"])
-# @login_required
+@permission_meta(name="加入股票池", module="投资标初选", mount=True)
+# 只有在分组授权后才可访问
+@group_required
+@login_required
 def batchInsertStockPool():
     params = request.json
     app.logger.info('start service batchInsertStockPool------服务入参：' + str(params))
@@ -89,7 +92,9 @@ def batchInsertStockPool():
 
 # 修改股票池股票备注
 @StockPool_api.route("/updateStockPoolByCode", methods=["post"])
-# @login_required
+@permission_meta(name="修改股票池备注", module="股票池", mount=True)
+@group_required
+@login_required
 def updateStockPoolByCode():
     params = request.json
     app.logger.info('start service updateStockPoolByCode------服务入参：' + str(params))
@@ -113,7 +118,9 @@ def updateStockPoolByCode():
 
 # 批量删除股票池
 @StockPool_api.route("/batchDeleteStockPool", methods=["post"])
-# @login_required
+@permission_meta(name="移出股票池", module="股票池", mount=True)
+@group_required
+@login_required
 def batchDeleteStockPool():
     params = request.json
     app.logger.info('start service batchDeleteStockPool------服务入参：' + str(params))

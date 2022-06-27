@@ -1,5 +1,5 @@
 from flask import Blueprint, request, Flask
-from lin import login_required
+from lin import login_required, permission_meta, group_required
 
 from app.api import AuthorizationBearerSecurity, api
 from app.api.investmentV1.exception.result import failed, success
@@ -16,6 +16,8 @@ upload_files_map = DevelopmentConfig.UPLOAD_FILES_MAP
 
 
 @upload_api.route("/uploadFile", methods=["POST"])
+@permission_meta(name="文件上传", module="文件上传", mount=True)
+@group_required
 @login_required
 @api.validate(
     tags=["文件"],

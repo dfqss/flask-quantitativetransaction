@@ -1,4 +1,4 @@
-from lin import NotFound
+from lin import NotFound, login_required, permission_meta, group_required
 from flask import Blueprint, request, Flask
 # start 模型必须引用后才能在数据库初始化对应表
 from app.api.investmentV1.exception.result import success, failed
@@ -21,7 +21,7 @@ coreIndex_api = Blueprint("coreIndex", __name__)
 
 # 核心指数分页查询
 @coreIndex_api.route("/getCoreIndexList", methods=["post"])
-# @login_required
+@login_required
 def getCoreIndexList():
     params = request.json
     app.logger.info('start service getCoreIndexList------服务入参：' + str(params))
@@ -78,7 +78,7 @@ def getCoreIndexList():
 
 # 查询核心指数历史记录分页查询
 @coreIndex_api.route("/getCoreIndexHistoryList", methods=["post"])
-# @login_required
+@login_required
 def getCoreIndexHistoryList():
     params = request.json
     app.logger.info('start service getCoreIndexHistoryList------服务入参：' + str(params))
@@ -136,7 +136,7 @@ def getCoreIndexHistoryList():
 
 # 查询核心指数历史记录分页查询
 @coreIndex_api.route("/validatePeriods", methods=["post"])
-# @login_required
+@login_required
 def validatePeriods():
     params = request.json
     app.logger.info('start service validatePeriods------服务入参：' + str(params))
@@ -155,6 +155,7 @@ def validatePeriods():
 
 # 根据股票编码：code查询核心指数信息
 @coreIndex_api.route('/<id>', methods=['GET'])
+@login_required
 def get_coreIndex(id):
     coreIndex = MbaCoreIndex.query.filter_by(code=id).first()
     if coreIndex:
@@ -164,12 +165,14 @@ def get_coreIndex(id):
 
 # 查询全部的核心指数列表
 @coreIndex_api.route("")
+@login_required
 def get_all_coreIndex():
     return MbaCoreIndex.get(one=False)
 
 
 # 核心指数分页查询
 @coreIndex_api.route('/getCoreIndexByPage/<int:page>,<int:limit>', methods=["GET"])
+@login_required
 def get_coreIndexByPage(page, limit):
     startIndex = (page - 1) * limit
     # pageData = db.session.query(MbaCoreIndex).offset(startIndex).limit(limit)
@@ -194,6 +197,9 @@ def get_coreIndexByPage(page, limit):
 
 # 根据code值删除核心指标
 @coreIndex_api.route('/updateCoreIndexByCode', methods=["POST"])
+@permission_meta(name="删除投资标初选数据", module="投资标初选", mount=True)
+@group_required
+@login_required
 def updateCoreIndexByCode():
     params = request.json
     app.logger.info('start service updateCoreIndexByCode------服务入参：' + str(params))

@@ -1,4 +1,6 @@
 from flask import Blueprint, request, Flask
+from lin import login_required
+
 from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.industryClass import MbaIndustryClass
 from app.api.investmentV1.model.coreIndex import MbaCoreIndex
@@ -8,7 +10,7 @@ industryClass_api = Blueprint("industryClass", __name__)
 
 #行业分类
 @industryClass_api.route("/getIndustryClassList", methods=["post"])
-# @login_required
+@login_required
 def getIndustryClassList():
     params = request.json
     app.logger.info('start service getStockPoolList------服务入参：' + str(params))

@@ -1,4 +1,5 @@
 from flask import Blueprint, request, Flask
+from lin import login_required
 
 from app.api.investmentV1.exception.result import failed, success
 from app.api.investmentV1.model.dupontAnalysisIndex import MbaDupontAnalysisIndex
@@ -9,7 +10,7 @@ dupontAnalysisIndex_api = Blueprint("dupontAnalysisIndex", __name__)
 
 
 @dupontAnalysisIndex_api.route("/getDupontAnalysisIndex", methods=["post"])
-# @login_required
+@login_required
 def getDupontAnalysisIndex():
     params = request.json
     app.logger.info('start service getDupontAnalysisIndex------服务入参：' + str(params))

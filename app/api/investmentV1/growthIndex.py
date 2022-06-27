@@ -1,4 +1,5 @@
 from flask import Blueprint, request, Flask
+from lin import login_required
 
 from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.growthIndex import MbaGrowthIndex
@@ -9,7 +10,7 @@ growthIndex_api = Blueprint("growthIndex", __name__)
 
 
 @growthIndex_api.route("/getGrowthIndex", methods=["post"])
-# @login_required
+@login_required
 def getGrowthIndex():
     params = request.json
     app.logger.info('start service getGrowthIndex------服务入参：' + str(params))
