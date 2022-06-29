@@ -89,7 +89,7 @@ if app.config.get("ENV") != "production":
 @notes   : 使用flask run命令启动时，需要将调用函数写在最外层，才能正确调用
            使用py命令调用时，需要将调用函数写在主函数里才能正确调用
 """
-#executeJob()
+executeJob()
 
 
 if __name__ == "__main__":
@@ -100,4 +100,4 @@ if __name__ == "__main__":
         ----------------------------
         """
     )
-    app.run(use_reloader=False)
+    app.run()
