@@ -6,10 +6,11 @@ from app.api.investmentV1.model.coreIndex import MbaCoreIndex
 from app.api.investmentV1.model.coreIndex import MbaCoreIndexHist
 from app.api.investmentV1.model.listingDateCal import MbaListingDateCal
 from app.api.investmentV1.model.stockPool import MbaStockPool
-from app.util.common import addFieldByConditions
+from app.util.common import addFieldByConditions, judgeOrder
 # end 模型必须引用后才能在数据库初始化对应表
 from sqlalchemy import func
 from lin import db
+from datetime import datetime
 from itertools import zip_longest
 from sqlalchemy import or_, and_, not_
 
@@ -29,6 +30,8 @@ def getCoreIndexList():
     codeName = params.get('codeName')
     pageSize = params.get('pageSize', 10)
     pageNum = params.get('pageNum', 1)
+    orderBy = params.get('orderBy')
+    flag = params.get('flag')
     startIndex = (pageNum - 1) * pageSize
     # 拼接查询条件
     filterList = []
@@ -38,6 +41,9 @@ def getCoreIndexList():
     # 根据股票名称查询
     if codeName is not None and len(codeName.strip()) > 0:
         filterList.append(MbaCoreIndex.code_name.startswith(codeName))
+    # 根据排序字段查询排序
+    if orderBy is not None and len(orderBy.strip()) > 0:
+        orderByList = judgeOrder(orderBy, flag, "code", "cal_date", "final_cal_core")
     # 查询展示状态为 0-展示 的数据
     filterList.append(MbaCoreIndex.status == '0')
     # 分页查询
@@ -53,7 +59,7 @@ def getCoreIndexList():
             .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code) \
             .outerjoin(MbaStockPool, MbaCoreIndex.code == MbaStockPool.code) \
             .filter(*filterList) \
-            .order_by(MbaCoreIndex.code) \
+            .order_by(*orderByList) \
             .offset(startIndex).limit(pageSize).all()
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
         mapList = ['code', 'codeName', 'finalCalCore', 'showTimes', 'periods',
@@ -61,6 +67,8 @@ def getCoreIndexList():
         dataList = []
         for returnData in pageData:
             dataList.append(dict(zip_longest(mapList, returnData)))
+        # 将list中的sql模板对象属性由datetime转为字符串类型
+        dataList = datetimeToString(dataList, "calDate")
         # 获取分页总条数
         totalNum = MbaCoreIndex.query.filter(*filterList).count()
     except Exception as e:
@@ -217,3 +225,13 @@ def updateCoreIndexByCode():
     successMap = success()
     app.logger.info('end service updateCoreIndexByCode------服务出参：' + str(successMap))
     return successMap
+
+
+# 将list中的sql模板对象属性由datetime转为字符串类型
+def datetimeToString(inList, key):
+    resultList = []
+    for dictDate in inList:
+        resultStr = datetime.strftime(dictDate[key], '%Y-%m-%d %H:%M:%S')
+        dictDate[key] = resultStr
+        resultList.append(dictDate)
+    return resultList

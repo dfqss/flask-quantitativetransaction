@@ -8,6 +8,9 @@ from dateutil import rrule
 
 
 # 获取当前系统时间的年月日时分秒(返回字符串对象) 返回格式-yyyymmdd
+from sqlalchemy import desc
+
+
 def get_now_time_yyyymmdd():
     return datetime.datetime.now().strftime("%Y%m%d")
 
@@ -133,6 +136,40 @@ def addFieldByConditions(dataList):
             date['capitalMarket'] = ''
         returnList.append(date)
     return returnList
+
+
+# 判断orderBy字段是否与args中的某个值相同，flag控制正序倒序
+def judgeOrder(orderBy, flag, *args):
+    orderBy = change_name(orderBy)
+    orderByList = []
+    for arg in args:
+        if orderBy == arg:
+            if flag:
+                orderByList.append(orderBy)
+            else:
+                orderByList.append(desc(orderBy))
+    return orderByList
+
+
+# 将字符串由驼峰命名转为下划线命名
+def change_name(listx):
+    listy = listx[0].lower()
+    for i in range(1, len(listx)):
+        if listx[i].isupper():  # 当自己是大写字母时
+            if i+1 >= len(listx):
+                listy += listx[i]
+            else:
+                if not listx[i + 1].isupper():  # 如果后面有一个小写字母，则把自己前加_,把自己变小
+                    listy += '_'
+                    listy += listx[i].lower()
+                elif not listx[i - 1].isupper():  # 如果前面有一个小写字母，加下划线
+                    listy += '_'
+                    listy += listx[i]
+                else:  # 如果前面或者后面有一个不为小写字母，则不变
+                    listy += listx[i]
+        else:  # 当自己是小写字母，什么都不变
+            listy += listx[i]
+    return listy
 
 
 basedir = os.getcwd()
