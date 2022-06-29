@@ -44,7 +44,7 @@ def getTecAnalysisIndexList():
 
 # 根据code值更新LON和buying
 @tecAnalysisIndex_api.route('/updateTecAnalysisIndexByCode', methods=["POST"])
-@permission_meta(name="根据code值更新LON和buying", module="技术分析指标", mount=True)
+@permission_meta(name="编辑技术分析指标", module="技术分析", mount=True)
 @group_required
 @login_required
 def updateTecAnalysisIndexByCode():
