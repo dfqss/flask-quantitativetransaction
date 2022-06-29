@@ -28,7 +28,7 @@ def init(force=False):
         root.username = "root"
         db.session.add(root)
         db.session.flush()
-        root.password = "123456"
+        root.password = "1003636228@mba_tzgl.123"
         # root用户 and  超级管理员分组 对应关系写入user_group表中
         user_group = manager.user_group_model()
         user_group.user_id = root.id
