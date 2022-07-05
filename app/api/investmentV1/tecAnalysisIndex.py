@@ -1,5 +1,6 @@
 from flask import Blueprint, request, Flask
 from app.api.investmentV1.model.tecAnalysisIndex import MbaTecAnalysisIndex
+from app.api.investmentV1.model.stockPool import MbaStockPool
 from app.api.investmentV1.exception.result import success, failed
 from lin import db, login_required, permission_meta, group_required
 
@@ -17,6 +18,7 @@ def getTecAnalysisIndexList():
     pageSize = params.get('pageSize', 10)
     pageNum = params.get('pageNum', 1)
     startIndex = (pageNum - 1) * pageSize
+    flag = params.get('flag')
     # 拼接查询条件
     filterList = []
     # 根据股票代码查询
@@ -27,11 +29,22 @@ def getTecAnalysisIndexList():
         filterList.append(MbaTecAnalysisIndex.code_name == codeName)
     # 分页查询
     try:
-        dataList = MbaTecAnalysisIndex.query.filter(*filterList) \
-            .order_by(MbaTecAnalysisIndex.code) \
-            .offset(startIndex).limit(pageSize).all()
-        # 获取分页总条数
-        totalNum = MbaTecAnalysisIndex.query.filter(*filterList).count()
+        if flag is not None and len(flag.strip()) > 0 and flag == 'byCode':
+            dataList = MbaTecAnalysisIndex.query.filter(*filterList) \
+                .join(MbaStockPool, MbaStockPool.code == MbaTecAnalysisIndex.code) \
+                .order_by(MbaTecAnalysisIndex.code) \
+                .offset(startIndex).limit(pageSize)\
+                .all()
+            # 获取分页总条数
+            totalNum = MbaTecAnalysisIndex.query.filter(*filterList)\
+                .join(MbaStockPool, MbaStockPool.code == MbaTecAnalysisIndex.code) \
+                .count()
+        else:
+            dataList = MbaTecAnalysisIndex.query.filter(*filterList) \
+                .order_by(MbaTecAnalysisIndex.code) \
+                .offset(startIndex).limit(pageSize).all()
+            # 获取分页总条数
+            totalNum = MbaTecAnalysisIndex.query.filter(*filterList).count()
     except Exception as e:
         app.logger.error('查询技术分析指标失败:' + str(e))
         return failed(10304)
