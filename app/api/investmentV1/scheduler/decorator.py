@@ -60,14 +60,14 @@ def import_core_index_data():
     createOrUpdateCoreIndex()
 
 
-# 定时任务实现代码：将财务分析指标数据导入数据库
+# 定时任务实现代码：将其他指标数据导入数据库
 @scheduler.task('interval', id='do_job_3', seconds=80, misfire_grace_time=900)
 def import_other_index_data():
     app.logger.info('Job 3 executed-读取批量指标文件数据')
     createOrUpdateOtherIndex()
 
 
-# 定时任务实现代码：将财务分析指标数据导入数据库
+# 定时任务实现代码：将上市日期数据导入数据库
 @scheduler.task('interval', id='do_job_4', seconds=30, misfire_grace_time=900)
 def import_listing_data():
     app.logger.info('Job 4 executed-读取上市日期文件')

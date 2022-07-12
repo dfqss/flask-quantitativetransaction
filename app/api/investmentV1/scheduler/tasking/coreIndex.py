@@ -1,3 +1,4 @@
+from app.api.investmentV1.exception.result import failed, success
 from app.api.investmentV1.model.coreIndex import MbaCoreIndex, MbaCoreIndexHist
 from app.api.investmentV1.model.batchFiles import MbaBatchFiles
 from app.util.excel import readExcel
@@ -26,12 +27,12 @@ def createOrUpdateCoreIndex():
     try:
         file = get_file_names()
     except Exception as e:
-        app.logger.info('获取核心指标文件名称失败！' + str(e))
-        return
+        app.logger.info('获取核心指标文件列表失败！' + str(e))
+        return failed(10215)
     # 没有查询到要读取的文件直接返回
     if len(file) <= 0:
         app.logger.info('没有需要计算的核心指标数据')
-        return
+        return success(20)
     # 获取文件路径、文件名称和文件期数
     filePath = file[0][0]
     fileName = file[0][1]
@@ -59,7 +60,7 @@ def createOrUpdateCoreIndex():
                 conn.session.rollback()
                 # 更新数据读取状态为：1-失败
                 update_batch_files_status(conn, fileName, '1', errMes)
-                return
+                return failed(10216)
         else:
             # 不包含REC8:查询核心指数表中的所有信息
             coreIndexData = conn.session.query(MbaCoreIndex).all()
@@ -92,8 +93,10 @@ def createOrUpdateCoreIndex():
         conn.session.rollback()
         # 更新数据读取状态为：1-失败
         update_batch_files_status(conn, fileName, '1', str(e))
+        return failed(10217)
     finally:
         conn.session.close()
+    return success(20)
 
 
 # 查询mba_batch_files表中需要写入的核心指标文件的路径和文件名

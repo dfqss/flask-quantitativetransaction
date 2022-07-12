@@ -1,5 +1,6 @@
 from flask import Flask
 
+from app.api.investmentV1.exception.result import failed, success
 from app.api.investmentV1.model.batchFiles import MbaBatchFiles
 from sqlalchemy import or_, and_, not_
 from flask_sqlalchemy import SQLAlchemy
@@ -55,7 +56,7 @@ def createOrUpdateOtherIndex():
         file = get_file_names(fileType)
         # 没有查询到要读取的文件直接返回
         if len(file) <= 0:
-            app.logger.info('--------end 该文件类型下没有需要读取的数据文件：' + fileType)
+            app.logger.info('该文件类型下没有需要读取的数据文件：' + fileType)
             continue
         # 获取文件路径、文件名称
         filePath = file[0][0]
@@ -79,9 +80,11 @@ def createOrUpdateOtherIndex():
             conn.session.rollback()
             # 更新数据读取状态为：1-失败
             update_batch_files_status(conn, fileName, '1', str(e))
+            return failed(10216)
         finally:
             conn.session.close()
         app.logger.info('--------end 读取批量指标文件结束-类型为：' + fileType)
+    return success(21)
 
 
 # 查询mba_batch_files表中需要写入的核心指标文件的路径和文件名

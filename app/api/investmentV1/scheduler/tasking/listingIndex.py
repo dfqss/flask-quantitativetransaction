@@ -1,3 +1,4 @@
+from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.listingDateCal import MbaListingDateCal
 from app.api.investmentV1.model.batchFiles import MbaBatchFiles
 import datetime
@@ -27,7 +28,7 @@ def createOrUpdateListingDateCal():
     # 没有查询到要读取的文件直接返回
     if len(file) <= 0:
         app.logger.info('没有需要计算上市日期数据')
-        return
+        return success(22)
     # 获取文件路径、文件名称
     filePath = file[0][0]
     fileName = file[0][1]
@@ -64,8 +65,10 @@ def createOrUpdateListingDateCal():
         conn.session.rollback()
         # 更新数据读取状态为：1-失败
         update_batch_files_status(conn, fileName, '1', str(e))
+        return failed(10216)
     finally:
         conn.session.close()
+    return success(22)
 
 
 # 查询mba_batch_files表中需要写入的上市时间文件的路径和文件名

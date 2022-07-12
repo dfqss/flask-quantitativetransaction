@@ -1,4 +1,6 @@
 from flask import Flask
+
+from app.api.investmentV1.exception.result import failed, success
 from app.util import files, common
 import os
 from flask_sqlalchemy import SQLAlchemy
@@ -24,21 +26,23 @@ def readFile():
         readingFiles = []
         try:
             okFiles = files.getFileNameList(filePath, '.ok')
-            app.logger.info('--------start 当前文件读取地址：' + filePath)
-            app.logger.info('开始读取批量文件：' + str(okFiles))
+            app.logger.info('--------start 批量文件入库：' + str(okFiles))
+            app.logger.info('当前批量文件地址：' + filePath)
             if len(okFiles) > 0:
                 readingFiles = files.renameFilesSuffix(filePath, okFiles, '.ok', '.reading')
                 create_batch_files(filePath, okFiles)
                 files.renameFilesSuffix(filePath, readingFiles, '.reading', '.success')
-                app.logger.info('--------end 批量文件读取成功' + filePath)
+                app.logger.info('--------end 批量文件入库成功' + filePath)
             else:
-                app.logger.info('--------end 路径[' + filePath + ']下没有需要读入的批量文件')
+                app.logger.info('--------end 路径[' + filePath + ']下没有需要入库的批量文件')
         except Exception as e:
-            app.logger.error('读取批量文件失败，开始事务回滚:' + str(e))
+            app.logger.error('批量文件入库失败，开始事务回滚:' + str(e))
             conn.session.rollback()
             files.renameFilesSuffix(filePath, readingFiles, '.reading', '.fail')
+            return failed(10214)
         finally:
             conn.session.close()
+        return success(19)
 
 
 # 创建批量文件表数据
