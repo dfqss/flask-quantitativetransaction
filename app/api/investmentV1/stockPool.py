@@ -61,6 +61,35 @@ def getStockPoolList():
     app.logger.info('end service getStockPoolList------服务出参：' + str(successMap))
     return successMap
 
+# 新增股票池股票
+@StockPool_api.route("/insertStockPool", methods=["post"])
+@permission_meta(name="新增股票池股票", module="股票池", mount=True)
+@group_required
+@login_required
+def insertStockPool():
+    params = request.json
+    app.logger.info('start service insertStockPool------服务入参：' + str(params))
+    code = params.get('code')
+    codeName = params.get('code_name')
+    if codeName is not None and len(codeName.strip()) > 0:
+        pass
+    periods = params.get('periods')
+    remark = params.get('remark')
+    try:
+        value = [{"code": code, "codeName": codeName, "periods": periods, "remark": remark}]
+        sql = "insert into mba_stock_pool(is_deleted,code,code_name,periods,remark,create_time,update_time)" \
+              "values(0,:code,:codeName,:periods,:remark,now(),now())"
+        db.session.execute(sql, value)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error('新增股票池股票失败:' + str(e))
+        return failed(10309)
+    finally:
+        db.session.close()
+    app.logger.info('end service insertStockPool------服务出参：' + str(params))
+    return success(102)
+
 
 # 批量插入股票池
 @StockPool_api.route("/batchInsertStockPool", methods=["post"])
