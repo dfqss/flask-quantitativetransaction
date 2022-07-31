@@ -11,7 +11,7 @@ class DevelopmentConfig(BaseConfig):
     数据库配置 当此处不配置时，自动会读取[.env]中的数据库配置信息
     """
     # 开发环境
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:123456@localhost:3306/lin_cmsflask'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost:3306/lin_cmsflask'
 
     # 生产环境
     # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://mba:!IDy_7)ZA-U3@localhost:3311/mba'
@@ -75,6 +75,9 @@ class DevelopmentConfig(BaseConfig):
         'REC8': r'C:\Users\thinkpad\Desktop\servers\coreIndex',
         'SSRQ': r'C:\Users\thinkpad\Desktop\servers\listingDate',
     }
+
+    # 测试环境文件下载路径
+    downloadFilePath = r'E:\学习资料\\'
 
     # 生产环境
     # UPLOAD_FILES_MAP = {

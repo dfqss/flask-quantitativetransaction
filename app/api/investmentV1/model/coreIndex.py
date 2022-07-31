@@ -14,6 +14,7 @@ class MbaCoreIndex(InfoCrud):
     status = Column(String(5), nullable=False, comment='展示状态：0-展示 1-不展示')
     show_times = Column(Integer, default=0, comment='展示次数')
     cal_date = Column(DateTime, nullable=False, comment='计算日期')
+    report_date = Column(DateTime, nullable=False, comment='报告日期')
 
     create_time = Column(DateTime, server_default=func.now(), comment='创建时间')
     update_time = Column(DateTime, server_default=func.now(), onupdate=func.now(), comment='更新时间')
@@ -29,6 +30,7 @@ class MbaCoreIndex(InfoCrud):
             'status': self.status,
             'show_times': self.show_times,
             'cal_date': self.cal_date,
+            'report_date': self.report_date,
             'create_time': self.create_time,
             'update_time': self.update_time
         }
