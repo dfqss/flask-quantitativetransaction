@@ -32,6 +32,8 @@ def getCoreIndexList():
     pageNum = params.get('pageNum', 1)
     orderBy = params.get('orderBy')
     flag = params.get('flag')
+    isNewShares = params.get('isNewShares')
+    isShowTimes = params.get('isShowTimes')
     startIndex = (pageNum - 1) * pageSize
     # 拼接查询条件
     filterList = []
@@ -41,6 +43,12 @@ def getCoreIndexList():
     # 根据股票名称查询
     if codeName is not None and len(codeName.strip()) > 0:
         filterList.append(MbaCoreIndex.code_name.startswith(codeName))
+    # 根据是否新股查询
+    if isNewShares:
+        filterList.append(MbaListingDateCal.is_new_shares == 'N')
+    # 根据是否本期新增查询
+    if isShowTimes:
+        filterList.append(MbaCoreIndex.show_times == 1)
     # 根据排序字段查询排序
     if orderBy is not None and len(orderBy.strip()) > 0:
         orderByList = judgeOrder(orderBy, flag, "code", "cal_date", "final_cal_core")
@@ -54,6 +62,7 @@ def getCoreIndexList():
                                     MbaCoreIndex.show_times,
                                     MbaCoreIndex.periods,
                                     MbaCoreIndex.cal_date,
+                                    MbaCoreIndex.report_date,
                                     MbaListingDateCal.is_new_shares,
                                     MbaStockPool.in_pool_status) \
             .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code) \
@@ -63,12 +72,13 @@ def getCoreIndexList():
             .offset(startIndex).limit(pageSize).all()
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
         mapList = ['code', 'codeName', 'finalCalCore', 'showTimes', 'periods',
-                   'calDate', 'isNewShares', 'inPoolStatus']
+                   'calDate', 'reportDate', 'isNewShares', 'inPoolStatus']
         dataList = []
         for returnData in pageData:
             dataList.append(dict(zip_longest(mapList, returnData)))
         # 将list中的sql模板对象属性由datetime转为字符串类型
         dataList = datetimeToString(dataList, "calDate")
+        dataList = datetimeToString(dataList, "reportDate")
         # 获取分页总条数
         totalNum = MbaCoreIndex.query.filter(*filterList).count()
     except Exception as e:
@@ -78,6 +88,10 @@ def getCoreIndexList():
     dataList = addFieldByConditions(dataList)
     # 返回参数信息
     successMap = success()
+    if dataList is not None and len(dataList) > 0:
+        successMap['periods'] = dataList[0]['periods']
+    else:
+        successMap['periods'] = 0
     successMap['dataList'] = dataList
     successMap['totalNum'] = totalNum
     app.logger.info('end service getCoreIndexList------服务出参：' + str(successMap))

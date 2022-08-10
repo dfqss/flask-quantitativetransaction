@@ -14,6 +14,8 @@ def create_investmentV1():
     from app.api.investmentV1.stockPool import StockPool_api
     from app.api.investmentV1.upload import upload_api
     from app.api.investmentV1.importData import importData_api
+    from app.api.investmentV1.download import download_file_api
+    from app.api.investmentV1.batchFiles import batchFiles_api
 
     bp_investmentV1.register_blueprint(coreIndex_api, url_prefix="/coreIndex")
     bp_investmentV1.register_blueprint(finAnalysisIndex_api, url_prefix="/finAnalysisIndex")
@@ -26,4 +28,7 @@ def create_investmentV1():
     bp_investmentV1.register_blueprint(StockPool_api, url_prefix="/stockPool")
     bp_investmentV1.register_blueprint(upload_api, url_prefix="/upload")
     bp_investmentV1.register_blueprint(importData_api, url_prefix="/importData")
+    bp_investmentV1.register_blueprint(download_file_api, url_prefix="/download")
+    bp_investmentV1.register_blueprint(batchFiles_api, url_prefix="batchFiles")
+
     return bp_investmentV1
