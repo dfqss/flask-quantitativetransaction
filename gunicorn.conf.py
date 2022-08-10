@@ -15,6 +15,9 @@ worker_class = "gthread"
 # 指定每个进程开启的线程数
 threads = 4
 
+# 超时时间
+timeout = 200
+
 # 设置守护进程,将进程交给supervisor管理
 daemon = False
 

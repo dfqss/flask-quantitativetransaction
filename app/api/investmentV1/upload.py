@@ -29,9 +29,11 @@ def uploadFile():
     # 获取表单数据
     formData = request.form
     app.logger.info('start service uploadFile------服务入参：' + str(formData) + '\n' + str(files))
-    # 获取文件类型
+    # 获取文件类型、期数、获取日期、报告日期
     fileType = formData.get('fileType')
     periods = formData.get('periods')
+    calDate = formData.get('calDate')
+    reportDate = formData.get('reportDate')
     # 判断文件类型是否为空
     if fileType is None or len(fileType.strip()) <= 0:
         app.logger.error('上传的文件类型为空' + str(files))
@@ -47,7 +49,7 @@ def uploadFile():
     # 判断当前文件类型是否在可上传范围内
     if fileType in upload_files_map:
         filePath = upload_files_map.get(fileType)
-        fileName = get_file_name(fileType, periods, '.xlsx')
+        fileName = get_file_name(fileType, periods, calDate, reportDate, '.xlsx')
     else:
         app.logger.error('该文件不在可上传的文件类型中' + str(files))
         return failed(10210)
@@ -68,9 +70,11 @@ def uploadFile():
 
 
 # 获取文件名称
-def get_file_name(fileType, periods, suffix):
+def get_file_name(fileType, periods, calDate, reportDate, suffix):
     if fileType == 'REC8':
         fileName = 'HXZB_REC8_' + periods + '_END8_' + common.get_now_time_yyyymmdd()
+    elif fileType == 'HXZB':
+        fileName = fileType + '_' + calDate + '&' + reportDate
     else:
         fileName = fileType + '_' + common.get_now_time_yyyymmdd()
     return fileName + '_' + str(datetime.datetime.now().microsecond) + suffix
