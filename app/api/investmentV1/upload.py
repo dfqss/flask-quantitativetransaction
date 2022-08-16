@@ -38,6 +38,11 @@ def uploadFile():
     if fileType is None or len(fileType.strip()) <= 0:
         app.logger.error('上传的文件类型为空' + str(files))
         return failed(10208)
+    if fileType == 'HXZB':
+        if calDate is None or len(calDate.strip()) <= 0:
+            return failed(10220)
+        if reportDate is None or len(reportDate.strip()) <= 0:
+            return failed(10221)
     # 核心指标-往期重算相关校验
     if fileType == 'REC8':
         if periods is None:
