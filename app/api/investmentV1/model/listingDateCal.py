@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 # 股票上市日期计算表（是否新股）
 class MbaListingDateCal(InfoCrud):
     code = Column(String(30), primary_key=True, comment='股票编码')
-    is_new_shares = Column(String(1), nullable=False, comment='是否新股')
+    is_new_shares = Column(String(1), nullable=False, comment='是否新股 新股-N 非新股-F 次新股-C')
     listing_day = Column(Integer, comment='上市天数')
     ipo_date = Column(DateTime, nullable=False, comment='上市日期')
 
