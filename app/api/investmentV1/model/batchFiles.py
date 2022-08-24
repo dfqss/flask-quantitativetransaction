@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 # 核心指标表
 class MbaBatchFiles(InfoCrud):
     file_name = Column(String(60), primary_key=True, comment='文件名称')
-    file_path = Column(String(60), comment='文件路径')
+    file_path = Column(String(120), comment='文件路径')
     file_periods = Column(Integer, comment='文件期数')
     status = Column(String(30), comment='文件读取状态 0-未读 1-读取失败 2-读取成功')
     description = Column(String(255), comment='描述')
