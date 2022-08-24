@@ -70,15 +70,12 @@ def insertStockPool():
     params = request.json
     app.logger.info('start service insertStockPool------服务入参：' + str(params))
     code = params.get('code')
-    codeName = params.get('code_name')
-    if codeName is not None and len(codeName.strip()) > 0:
-        pass
-    periods = params.get('periods')
+    codeName = params.get('codeName')
     remark = params.get('remark')
     try:
-        value = [{"code": code, "codeName": codeName, "periods": periods, "remark": remark}]
-        sql = "insert into mba_stock_pool(is_deleted,code,code_name,periods,remark,create_time,update_time)" \
-              "values(0,:code,:codeName,:periods,:remark,now(),now())"
+        value = [{"code": code, "codeName": codeName, "remark": remark}]
+        sql = "insert into mba_stock_pool(is_deleted,code,code_name,remark,create_time,update_time)" \
+              "values(0,:code,:codeName,:remark,now(),now())"
         db.session.execute(sql, value)
         db.session.commit()
     except Exception as e:

@@ -4,6 +4,7 @@ from flask import Blueprint, request, Flask
 from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.coreIndex import MbaCoreIndex
 from app.api.investmentV1.model.coreIndex import MbaCoreIndexHist
+from app.api.investmentV1.model.industryClass import MbaIndustryClass
 from app.api.investmentV1.model.listingDateCal import MbaListingDateCal
 from app.api.investmentV1.model.stockPool import MbaStockPool
 from app.util.common import addFieldByConditions, judgeOrder
@@ -63,16 +64,19 @@ def getCoreIndexList():
                                     MbaCoreIndex.periods,
                                     MbaCoreIndex.cal_date,
                                     MbaCoreIndex.report_date,
+                                    MbaIndustryClass.industry_sw,
                                     MbaListingDateCal.is_new_shares,
                                     MbaStockPool.in_pool_status) \
             .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code) \
             .outerjoin(MbaStockPool, MbaCoreIndex.code == MbaStockPool.code) \
+            .outerjoin(MbaIndustryClass, MbaCoreIndex.code == MbaIndustryClass.code) \
             .filter(*filterList) \
             .order_by(*orderByList) \
             .offset(startIndex).limit(pageSize).all()
+        print(pageData)
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
         mapList = ['code', 'codeName', 'finalCalCore', 'showTimes', 'periods',
-                   'calDate', 'reportDate', 'isNewShares', 'inPoolStatus']
+                   'calDate', 'reportDate', 'industrySw', 'isNewShares', 'inPoolStatus']
         dataList = []
         for returnData in pageData:
             dataList.append(dict(zip_longest(mapList, returnData)))
