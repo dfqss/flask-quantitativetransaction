@@ -55,7 +55,8 @@ def getCoreIndexList():
             filterList.append(MbaCoreIndex.show_times != 1)
     # 根据排序字段查询排序
     if orderBy is not None and len(orderBy.strip()) > 0:
-        orderByList = judgeOrder(orderBy, flag, "code", "cal_date", "final_cal_core")
+        orderByList = judgeOrder(orderBy, flag, "code", "cal_date", "final_cal_core",
+                                 "pre_final_cal_core")
     # 查询展示状态为 0-展示 的数据
     filterList.append(MbaCoreIndex.status == '0')
     filterList.append(MbaCoreIndexHist.periods == MbaCoreIndex.periods - 1)
@@ -68,7 +69,7 @@ def getCoreIndexList():
                                     MbaCoreIndex.periods,
                                     MbaCoreIndex.cal_date,
                                     MbaCoreIndex.report_date,
-                                    MbaIndustryClass.industry_sw,
+                                    MbaIndustryClass.industry_sw.label("pre_final_cal_core"),
                                     MbaListingDateCal.is_new_shares,
                                     MbaStockPool.in_pool_status,
                                     MbaCoreIndexHist.final_cal_core) \
@@ -81,7 +82,8 @@ def getCoreIndexList():
             .offset(startIndex).limit(pageSize).all()
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
         mapList = ['code', 'codeName', 'finalCalCore', 'showTimes', 'periods',
-                   'calDate', 'reportDate', 'isNewShares', 'inPoolStatus', 'preFinalCalCore']
+                   'calDate', 'reportDate', 'industrySw', 'isNewShares', 'inPoolStatus',
+                   'preFinalCalCore']
         dataList = []
         for returnData in pageData:
             dataList.append(dict(zip_longest(mapList, returnData)))
@@ -89,9 +91,10 @@ def getCoreIndexList():
         dataList = datetimeToString(dataList, "calDate")
         dataList = datetimeToString(dataList, "reportDate")
         # 获取分页总条数
-        totalNum = MbaCoreIndex.query\
-            .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code)\
+        totalNum = MbaCoreIndex.query \
+            .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code) \
             .outerjoin(MbaStockPool, MbaCoreIndex.code == MbaStockPool.code) \
+            .outerjoin(MbaIndustryClass, MbaCoreIndex.code == MbaIndustryClass.code) \
             .outerjoin(MbaCoreIndexHist, MbaCoreIndex.code == MbaCoreIndexHist.code) \
             .filter(*filterList).count()
     except Exception as e:
