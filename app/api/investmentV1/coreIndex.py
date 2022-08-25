@@ -69,10 +69,10 @@ def getCoreIndexList():
                                     MbaCoreIndex.periods,
                                     MbaCoreIndex.cal_date,
                                     MbaCoreIndex.report_date,
-                                    MbaIndustryClass.industry_sw.label("pre_final_cal_core"),
+                                    MbaIndustryClass.industry_sw,
                                     MbaListingDateCal.is_new_shares,
                                     MbaStockPool.in_pool_status,
-                                    MbaCoreIndexHist.final_cal_core) \
+                                    MbaCoreIndexHist.final_cal_core.label("pre_final_cal_core")) \
             .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code) \
             .outerjoin(MbaStockPool, MbaCoreIndex.code == MbaStockPool.code) \
             .outerjoin(MbaIndustryClass, MbaCoreIndex.code == MbaIndustryClass.code) \
