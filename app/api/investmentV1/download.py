@@ -31,27 +31,27 @@ def downloadStockPoolFile():  # 执行视图函数
     if fileTpye == 'StockPool':
         data = stockPool_data()  # 获取数据
         # 生成excel文件列表头字段
-        keys = ['股票代码', '股票名称', '创建日期', '备注', '行业名称(申万)', '资本市场指标']
+        keys = ['股票代码', '股票名称', '行业名称(申万)', '备注', '创建日期', '资本市场指标']
         # 文件名
         file_name = str(round(time.time() * 1000)) + "_StockPool.xls"
         # execl sheet名
         sheet = "StockPool"
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
-        mapList = ['code', 'codeName', 'periods', 'create_time', 'remark', 'industry_sw']
+        mapList = ['code', 'codeName', 'periods', 'remark', 'create_time', 'industry_sw']
         dataList = model_to_dict(data, mapList)
     elif fileTpye == 'CoreIndex':
         # 数据
         data = coreIndex_date()  # 获取数据
         # 生成excel文件列表头字段
-        keys = ['股票代码', '股票名称', '本期核心指数', '是否本期新增', 'periods',
-                '获取日期', '报告日期', '行业名称(申万)', '是否新股', '上期核心指数', "资本市场指标"]
+        keys = ['股票代码', '股票名称', '行业名称(申万)', '上期核心指数', '本期核心指数', '是否新股', '期数', '是否本期新增', '获取日期',
+                '报告日期', "资本市场指标"]
         # 文件名
         file_name = str(round(time.time() * 1000)) + "_CoreIndex.xls"
         # execl sheet名
         sheet = "CoreIndex"
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
-        mapList = ['code', 'codeName', 'finalCalCore', 'showTimes', 'periods',
-                   'calDate', 'reportDate', 'industrySw', 'isNewShares', 'preFinalCalCore']
+        mapList = ['code', 'codeName', 'industrySw', 'preFinalCalCore', 'finalCalCore',
+                   'isNewShares', 'periods', 'showTimes', 'calDate', 'reportDate']
         dataList = model_to_dict(data, mapList)
         dataList = capsulationDate(dataList)
     # 添加资本市场指标
@@ -126,10 +126,11 @@ def capsulationDate(dataList):
 def stockPool_data():
     dateList = db.session.query(MbaStockPool.code,
                                 MbaStockPool.code_name,
-                                func.date_format(MbaStockPool.create_time, "%Y-%m-%d").label(
-                                    "m_time"),
+                                MbaIndustryClass.industry_sw,
                                 MbaStockPool.remark,
-                                MbaIndustryClass.industry_sw) \
+                                func.date_format(MbaStockPool.create_time, "%Y-%m-%d").label(
+                                    "m_time")
+                                ) \
         .outerjoin(MbaIndustryClass, MbaStockPool.code == MbaIndustryClass.code).all()
     return dateList
 
@@ -137,22 +138,21 @@ def stockPool_data():
 def coreIndex_date():
     # 拼接查询条件
     filterList = []
-    # 查询展示状态为 0-展示 的数据
-    filterList.append(MbaCoreIndex.status == '0')
-    filterList.append(MbaCoreIndexHist.periods == MbaCoreIndex.periods - 1)
     dateList = db.session.query(MbaCoreIndex.code,
                                 MbaCoreIndex.code_name,
-                                MbaCoreIndex.final_cal_core,
-                                MbaCoreIndex.show_times,
-                                MbaCoreIndex.periods,
-                                func.date_format(MbaCoreIndex.cal_date, "%Y-%m-%d").label("m_time"),
-                                func.date_format(MbaCoreIndex.report_date, "%Y-%m-%d").label(
-                                    "m_time"),
                                 MbaIndustryClass.industry_sw,
+                                MbaCoreIndexHist.final_cal_core.label("pre_final_cal_core"),
+                                MbaCoreIndex.final_cal_core,
                                 MbaListingDateCal.is_new_shares,
-                                MbaCoreIndexHist.final_cal_core.label("pre_final_cal_core")) \
+                                MbaCoreIndex.periods,
+                                MbaCoreIndex.show_times,
+                                func.date_format(MbaCoreIndex.cal_date, "%Y-%m-%d").label("m_time"),
+                                func.date_format(MbaCoreIndex.report_date, "%Y-%m-%d").label("m_time")) \
         .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code) \
         .outerjoin(MbaIndustryClass, MbaCoreIndex.code == MbaIndustryClass.code) \
         .outerjoin(MbaCoreIndexHist, MbaCoreIndex.code == MbaCoreIndexHist.code) \
         .filter(*filterList).all()
+    # 查询展示状态为 0-展示 的数据
+    filterList.append(MbaCoreIndex.status == '0')
+    filterList.append(MbaCoreIndexHist.periods == MbaCoreIndex.periods - 1)
     return dateList
