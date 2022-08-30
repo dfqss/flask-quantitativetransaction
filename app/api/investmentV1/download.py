@@ -138,6 +138,8 @@ def stockPool_data():
 def coreIndex_date():
     # 拼接查询条件
     filterList = []
+    filterList.append(MbaCoreIndex.status == '0')
+    filterList.append(MbaCoreIndexHist.periods == MbaCoreIndex.periods - 1)
     dateList = db.session.query(MbaCoreIndex.code,
                                 MbaCoreIndex.code_name,
                                 MbaIndustryClass.industry_sw,
@@ -153,6 +155,4 @@ def coreIndex_date():
         .outerjoin(MbaCoreIndexHist, MbaCoreIndex.code == MbaCoreIndexHist.code) \
         .filter(*filterList).all()
     # 查询展示状态为 0-展示 的数据
-    filterList.append(MbaCoreIndex.status == '0')
-    filterList.append(MbaCoreIndexHist.periods == MbaCoreIndex.periods - 1)
     return dateList
