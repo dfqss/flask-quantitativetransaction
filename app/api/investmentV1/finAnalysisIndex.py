@@ -9,6 +9,9 @@ from app.api.investmentV1.model.coreIndex import MbaCoreIndex
 from app.api.investmentV1.model.industryClass import MbaIndustryClass
 from lin import db
 
+from app.api.investmentV1.model.stockPool import MbaStockPool
+from app.util.common import judgeOrder
+
 app = Flask(__name__)
 finAnalysisIndex_api = Blueprint("finAnalysisIndex", __name__)
 
@@ -22,14 +25,15 @@ def getFinAnalysisIndexList():
     code = params.get('code')
     codeName = params.get('codeName')
     industry_sw = params.get('industry_sw')
+    orderBy = params.get('orderBy')
+    orderFlag = params.get('orderFlag')
     pageSize = params.get('pageSize', 10)
     pageNum = params.get('pageNum', 1)
     startIndex = (pageNum - 1) * pageSize
     flag = params.get('flag')
     # 拼接查询条件
     filterList = []
-    order_byList = []
-    order_byList.append(MbaFinAnalysisIndex.code)
+    orderByList = []
     # 根据股票代码查询
     if code is not None and len(code.strip()) > 0:
         filterList.append(MbaFinAnalysisIndex.code.startswith(code))
@@ -39,8 +43,9 @@ def getFinAnalysisIndexList():
     # 根据行业分类查询
     if industry_sw is not None and len(industry_sw.strip()) > 0:
         filterList.append(MbaIndustryClass.industry_sw.startswith(industry_sw))
-        order_byList.clear()
-        order_byList.append(MbaFinAnalysisIndex.roe_basic * 1)
+    # 根据排序字段查询排序
+    if orderBy is not None and len(orderBy.strip()) > 0:
+        orderByList = judgeOrder(orderBy, orderFlag, "roe_basic")
     try:
         if flag is not None and len(flag.strip()) > 0 and flag == 'byCode':
             # 分页查询
@@ -66,16 +71,19 @@ def getFinAnalysisIndexList():
                                         MbaFinAnalysisIndex.cf_ps,
                                         MbaFinAnalysisIndex.eps_basic,
                                         MbaFinAnalysisIndex.bps,
+                                        MbaStockPool.in_pool_status,
                                         MbaIndustryClass.industry_sw) \
                 .outerjoin(MbaCoreIndex, MbaCoreIndex.code == MbaFinAnalysisIndex.code) \
-                .outerjoin(MbaIndustryClass, MbaFinAnalysisIndex.code == MbaIndustryClass.code)\
+                .outerjoin(MbaIndustryClass, MbaFinAnalysisIndex.code == MbaIndustryClass.code) \
+                .outerjoin(MbaStockPool, MbaFinAnalysisIndex.code == MbaStockPool.code) \
                 .filter(*filterList) \
-                .order_by(*order_byList) \
+                .order_by(*orderByList) \
                 .offset(startIndex).limit(pageSize).all()
             if industry_sw is not None and len(industry_sw.strip()) > 0:
                 totalNum = MbaFinAnalysisIndex.query.filter(*filterList)\
                     .outerjoin(MbaCoreIndex, MbaCoreIndex.code == MbaFinAnalysisIndex.code)\
-                    .outerjoin(MbaIndustryClass, MbaIndustryClass.code == MbaFinAnalysisIndex.code)\
+                    .outerjoin(MbaIndustryClass, MbaIndustryClass.code == MbaFinAnalysisIndex.code) \
+                    .outerjoin(MbaStockPool, MbaFinAnalysisIndex.code == MbaStockPool.code) \
                     .count()
             else:
                 totalNum = MbaFinAnalysisIndex.query.filter(*filterList). \
@@ -103,23 +111,26 @@ def getFinAnalysisIndexList():
                                         MbaFinAnalysisIndex.cf_ps,
                                         MbaFinAnalysisIndex.eps_basic,
                                         MbaFinAnalysisIndex.bps,
+                                        MbaStockPool.in_pool_status,
                                         MbaIndustryClass.industry_sw) \
                 .outerjoin(MbaIndustryClass, MbaFinAnalysisIndex.code == MbaIndustryClass.code) \
+                .outerjoin(MbaStockPool, MbaFinAnalysisIndex.code == MbaStockPool.code) \
                 .filter(*filterList) \
-                .order_by(*order_byList) \
+                .order_by(*orderByList) \
                 .offset(startIndex).limit(pageSize).all()
             if industry_sw is not None and len(industry_sw.strip()) > 0:
                 totalNum = MbaFinAnalysisIndex.query \
                     .outerjoin(MbaIndustryClass, MbaFinAnalysisIndex.code == MbaIndustryClass.code) \
+                    .outerjoin(MbaStockPool, MbaFinAnalysisIndex.code == MbaStockPool.code) \
                     .filter(*filterList)\
                     .count()
             else:
                 totalNum = MbaFinAnalysisIndex.query.filter(*filterList).count()
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
-        mapList = ['code', 'code_name', 'roe_avg', 'roe_basic', 'roa',
+        mapList = ['code', 'codeName', 'roe_avg', 'roe_basic', 'roa',
                    'gross_profit_margin', 'net_profit_margin', 'tot_ope_rev', 'ope_rev', 'goodwill',
                    'r_and_d_costs', 'segment_sales', 'debt_to_assets', 'cash_to_current_debt', 'pe',
-                   'pb', 'gr_ps', 'or_ps', 'cf_ps', 'eps_basic', 'bps', 'industry_sw']
+                   'pb', 'gr_ps', 'or_ps', 'cf_ps', 'eps_basic', 'bps', 'inPoolStatus', 'industry_sw']
         dataList = []
         for returnData in pageData:
             dataList.append(dict(zip_longest(mapList, returnData)))

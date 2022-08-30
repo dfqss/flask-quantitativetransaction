@@ -101,9 +101,9 @@ def batchInsertStockPool():
     try:
         if len(insertData) != 0:
             sql = "insert into mba_stock_pool " \
-                  "(is_deleted, code, code_name, periods, in_pool_status, " \
+                  "(is_deleted, code, code_name, in_pool_status, " \
                   "create_time, update_time) values " \
-                  "('0', :code, :codeName, :periods, 'in', now(), now()) "
+                  "('0', :code, :codeName, 'in', now(), now()) "
             db.session.execute(sql, insertData)
             db.session.commit()
     except Exception as e:
