@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 from itertools import zip_longest
+from operator import and_
 
 import xlwt
 from flask import Flask, Blueprint, make_response, send_file, request
@@ -13,6 +14,8 @@ from app.api.investmentV1.model.listingDateCal import MbaListingDateCal
 from app.api.investmentV1.model.stockPool import MbaStockPool
 from app.config.development import DevelopmentConfig
 from app.api.investmentV1.model.coreIndex import MbaCoreIndex, MbaCoreIndexHist
+from app.api.investmentV1.model.backtest import MbaCoreIndexBack, MbaFinAnalysisIndexBack, \
+    MbaRangeRiseCommon
 from sqlalchemy import func
 
 from app.util import common
@@ -27,8 +30,8 @@ downloadFilePath = DevelopmentConfig.downloadFilePath
 
 @download_file_api.route('/downloadFile', methods=["get"])  # 设置路由
 def downloadStockPoolFile():  # 执行视图函数
-    fileTpye = request.args.get("fileTpye")
-    if fileTpye == 'StockPool':
+    fileType = request.args.get("fileType")
+    if fileType == 'StockPool':
         data = stockPool_data()  # 获取数据
         # 生成excel文件列表头字段
         keys = ['股票代码', '股票名称', '行业名称(申万)', '备注', '创建日期', '资本市场指标']
@@ -39,7 +42,7 @@ def downloadStockPoolFile():  # 执行视图函数
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
         mapList = ['code', 'codeName', 'periods', 'remark', 'create_time', 'industry_sw']
         dataList = model_to_dict(data, mapList)
-    elif fileTpye == 'CoreIndex':
+    elif fileType == 'CoreIndex':
         # 数据
         data = coreIndex_date()  # 获取数据
         # 生成excel文件列表头字段
@@ -54,6 +57,21 @@ def downloadStockPoolFile():  # 执行视图函数
                    'isNewShares', 'periods', 'showTimes', 'calDate', 'reportDate']
         dataList = model_to_dict(data, mapList)
         dataList = capsulationDate(dataList)
+    elif fileType == 'CodeIndexBack':
+        # 获取文件期数
+        periods = request.args.get("periods")
+        # 数据
+        data = coreIndexBack_date(periods)  # 获取数据
+        # 生成excel文件列表头字段
+        keys = ['股票代码', '股票名称', '期数', '核心指数', '净资产收益率ROE(平均)', '季涨幅', '半年涨幅', '报告日期']
+        # 文件名
+        file_name = str(round(time.time() * 1000)) + "_CoreIndexBack.xls"
+        # execl sheet名
+        sheet = "CoreIndexBack"
+        # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
+        mapList = ['code', 'codeName', 'periods', 'finalCalCore', 'roeAvg',
+                   'quarterRise', 'halfYearRise', 'calDate']
+        dataList = model_to_dict(data, mapList)
     # 添加资本市场指标
     dataList = addFieldByConditions(dataList)
     app.logger.info('start service downloadFile------excel文件下载：' + file_name)
@@ -136,10 +154,9 @@ def stockPool_data():
 
 
 def coreIndex_date():
-    # 拼接查询条件
-    filterList = []
-    filterList.append(MbaCoreIndex.status == '0')
-    filterList.append(MbaCoreIndexHist.periods == MbaCoreIndex.periods - 1)
+    # 拼接查询条件-查询展示状态为 0-展示 的数据
+    filterList = [MbaCoreIndex.status == '0', MbaCoreIndexHist.periods == MbaCoreIndex.periods - 1]
+    # 查询数据
     dateList = db.session.query(MbaCoreIndex.code,
                                 MbaCoreIndex.code_name,
                                 MbaIndustryClass.industry_sw,
@@ -149,10 +166,32 @@ def coreIndex_date():
                                 MbaCoreIndex.periods,
                                 MbaCoreIndex.show_times,
                                 func.date_format(MbaCoreIndex.cal_date, "%Y-%m-%d").label("m_time"),
-                                func.date_format(MbaCoreIndex.report_date, "%Y-%m-%d").label("m_time")) \
+                                func.date_format(MbaCoreIndex.report_date, "%Y-%m-%d").label(
+                                    "m_time")) \
         .outerjoin(MbaListingDateCal, MbaCoreIndex.code == MbaListingDateCal.code) \
         .outerjoin(MbaIndustryClass, MbaCoreIndex.code == MbaIndustryClass.code) \
         .outerjoin(MbaCoreIndexHist, MbaCoreIndex.code == MbaCoreIndexHist.code) \
         .filter(*filterList).all()
-    # 查询展示状态为 0-展示 的数据
+    return dateList
+
+
+def coreIndexBack_date(periods):
+    # 拼接查询条件-查询展示状态为 0-展示 的数据-根据期数查询
+    filterList = [MbaCoreIndexBack.status == '0', MbaCoreIndexBack.periods == periods]
+    dateList = db.session.query(MbaCoreIndexBack.code,
+                                MbaCoreIndexBack.code_name,
+                                MbaCoreIndexBack.periods,
+                                MbaCoreIndexBack.final_cal_core,
+                                MbaFinAnalysisIndexBack.roe_avg,
+                                MbaRangeRiseCommon.quarter_rise,
+                                MbaRangeRiseCommon.half_year_rise,
+                                MbaCoreIndexBack.cal_date) \
+        .outerjoin(MbaFinAnalysisIndexBack,
+                   and_(MbaCoreIndexBack.code == MbaFinAnalysisIndexBack.code,
+                        MbaCoreIndexBack.periods == MbaFinAnalysisIndexBack.periods)
+                   ) \
+        .outerjoin(MbaRangeRiseCommon, and_(MbaCoreIndexBack.code == MbaRangeRiseCommon.code,
+                                            MbaCoreIndexBack.periods == MbaRangeRiseCommon.periods)
+                   ) \
+        .filter(*filterList).order_by(MbaCoreIndexBack.code).all()
     return dateList
