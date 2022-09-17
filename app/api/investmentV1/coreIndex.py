@@ -7,13 +7,13 @@ from app.api.investmentV1.model.coreIndex import MbaCoreIndexHist
 from app.api.investmentV1.model.industryClass import MbaIndustryClass
 from app.api.investmentV1.model.listingDateCal import MbaListingDateCal
 from app.api.investmentV1.model.stockPool import MbaStockPool
-from app.util.common import addFieldByConditions, judgeOrder
+from app.util.common import addFieldByConditions
 # end 模型必须引用后才能在数据库初始化对应表
 from sqlalchemy import func
 from lin import db
 from datetime import datetime
 from itertools import zip_longest
-from sqlalchemy import or_, and_, not_
+from sqlalchemy import and_
 
 # from flask import jsonify
 
@@ -31,8 +31,7 @@ def getCoreIndexList():
     codeName = params.get('codeName')
     pageSize = params.get('pageSize', 10)
     pageNum = params.get('pageNum', 1)
-    orderBy = params.get('orderBy')
-    flag = params.get('flag')
+    orderByList = params.get('orderByList')
     isNewShares = params.get('isNewShares')
     isShowTimes = params.get('isShowTimes')
     startIndex = (pageNum - 1) * pageSize
@@ -53,13 +52,13 @@ def getCoreIndexList():
             filterList.append(MbaCoreIndex.show_times == 1)
         elif isShowTimes == 'N':
             filterList.append(MbaCoreIndex.show_times != 1)
-    # 根据排序字段查询排序
-    if orderBy is not None and len(orderBy.strip()) > 0:
-        orderByList = judgeOrder(orderBy, flag, "code", "cal_date", "final_cal_core",
-                                 "pre_final_cal_core")
     # 查询展示状态为 0-展示 的数据
     filterList.append(MbaCoreIndex.status == '0')
     filterList.append(MbaCoreIndexHist.periods == MbaCoreIndex.periods - 1)
+    # 根据排序字段查询排序
+    orderList = []
+    if len(orderByList) > 0:
+        orderList = getOrderList(orderByList)
     # 分页查询
     try:
         pageData = db.session.query(MbaCoreIndex.code,
@@ -78,7 +77,7 @@ def getCoreIndexList():
             .outerjoin(MbaIndustryClass, MbaCoreIndex.code == MbaIndustryClass.code) \
             .outerjoin(MbaCoreIndexHist, MbaCoreIndex.code == MbaCoreIndexHist.code) \
             .filter(*filterList) \
-            .order_by(*orderByList) \
+            .order_by(*orderList) \
             .offset(startIndex).limit(pageSize).all()
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
         mapList = ['code', 'codeName', 'finalCalCore', 'showTimes', 'periods',
@@ -265,3 +264,25 @@ def datetimeToString(inList, key):
         dictDate[key] = resultStr
         resultList.append(dictDate)
     return resultList
+
+
+# 获取排序列表
+def getOrderList(orderByList):
+    orderList = []
+    for orderByMap in orderByList:
+        orderBy = orderByMap['orderBy']
+        if 'des' == orderByMap['orderType']:
+            if 'code' == orderBy:
+                orderList.append(MbaCoreIndex.code.desc())
+            elif 'finalCalCore' == orderBy:
+                orderList.append((MbaCoreIndex.final_cal_core * 1).desc())
+            elif 'preFinalCalCore' == orderBy:
+                orderList.append((MbaCoreIndexHist.final_cal_core * 1).desc())
+        else:
+            if 'code' == orderBy:
+                orderList.append(MbaCoreIndex.code)
+            elif 'finalCalCore' == orderBy:
+                orderList.append(MbaCoreIndex.final_cal_core * 1)
+            elif 'preFinalCalCore' == orderBy:
+                orderList.append(MbaCoreIndexHist.final_cal_core * 1)
+    return orderList
