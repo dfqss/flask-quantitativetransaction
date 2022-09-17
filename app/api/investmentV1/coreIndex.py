@@ -145,6 +145,8 @@ def getCoreIndexHistoryList():
         # 分页查询
         pageData = db.session.query(MbaCoreIndexHist.code,
                                     MbaCoreIndexHist.code_name,
+                                    MbaCoreIndexHist.current_core,
+                                    MbaCoreIndexHist.period_core,
                                     MbaCoreIndexHist.final_cal_core,
                                     MbaCoreIndexHist.cal_date,
                                     MbaCoreIndexHist.periods,
@@ -154,7 +156,7 @@ def getCoreIndexHistoryList():
             .order_by(MbaCoreIndexHist.periods, MbaCoreIndexHist.code) \
             .offset(startIndex).limit(pageSize).all()
         # 定义返回参数列表：顺序和字段名称需要和查询的列保持一致
-        mapList = ['code', 'codeName', 'finalCalCore', 'calDate', 'periods', 'isNewShares']
+        mapList = ['code', 'codeName', 'currentCore', 'periodCore', 'finalCalCore', 'calDate', 'periods', 'isNewShares']
         dataList = []
         for returnData in pageData:
             dataList.append(dict(zip_longest(mapList, returnData)))
