@@ -65,7 +65,7 @@ def createOrUpdateListingDateCal():
         conn.session.rollback()
         # 更新数据读取状态为：1-失败
         update_batch_files_status(conn, fileName, '1', str(e))
-        return failed(10216)
+        return failed(10219)
     finally:
         conn.session.close()
     return success(22)
