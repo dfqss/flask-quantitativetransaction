@@ -135,10 +135,10 @@ def getCoreIndexHistoryList():
     # 根据股票名称查询
     if codeName is not None and len(codeName.strip()) > 0:
         filterList.append(MbaCoreIndexHist.code_name.startswith(codeName))
-    # 根据时间戳查询
+    # 根据时间区间查询
     if calDate is not None and len(calDate.strip()) > 0:
-        filterList.append(func.date_format(calDate, "%Y-%m-%d") ==
-                          func.date_format(MbaCoreIndexHist.cal_date, "%Y-%m-%d"))
+        split = str(calDate).split(',')
+        filterList.append(MbaCoreIndexHist.cal_date.between(split[0], split[1]))
     # 根据期数查询
     if periods is not None and len(periods.strip()) > 0:
         filterList.append(MbaCoreIndexHist.periods == periods)

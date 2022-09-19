@@ -46,6 +46,7 @@ class FileUploader(Uploader):
                         "key": fileName,
                         "id": exists.id,
                         "path": exists.path,
+                        "repetition": "true",
                         # "url": site_domain
                         #        + os.path.join(current_app.static_url_path, exists.path),
                     }
@@ -74,6 +75,7 @@ class FileUploader(Uploader):
                         "key": fileName,
                         "id": file.id,
                         "path": file.path,
+                        "repetition": "false",
                         # "url": site_domain + os.path.join(current_app.static_url_path, file.path),
                     }
                 )
