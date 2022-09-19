@@ -7,10 +7,8 @@ from app.api.investmentV1.exception.result import success, failed
 from app.api.investmentV1.model.finAnalysisIndex import MbaFinAnalysisIndex
 from app.api.investmentV1.model.coreIndex import MbaCoreIndex
 from app.api.investmentV1.model.industryClass import MbaIndustryClass
-from lin import db
-
 from app.api.investmentV1.model.stockPool import MbaStockPool
-from app.util.common import judgeOrder
+from lin import db
 
 app = Flask(__name__)
 finAnalysisIndex_api = Blueprint("finAnalysisIndex", __name__)
@@ -25,15 +23,13 @@ def getFinAnalysisIndexList():
     code = params.get('code')
     codeName = params.get('codeName')
     industry_sw = params.get('industry_sw')
-    orderBy = params.get('orderBy')
-    orderFlag = params.get('orderFlag')
+    orderByList = params.get('orderByList')
     pageSize = params.get('pageSize', 10)
     pageNum = params.get('pageNum', 1)
     startIndex = (pageNum - 1) * pageSize
     flag = params.get('flag')
     # 拼接查询条件
     filterList = []
-    orderByList = []
     # 根据股票代码查询
     if code is not None and len(code.strip()) > 0:
         filterList.append(MbaFinAnalysisIndex.code.startswith(code))
@@ -44,8 +40,9 @@ def getFinAnalysisIndexList():
     if industry_sw is not None and len(industry_sw.strip()) > 0:
         filterList.append(MbaIndustryClass.industry_sw.startswith(industry_sw))
     # 根据排序字段查询排序
-    if orderBy is not None and len(orderBy.strip()) > 0:
-        orderByList = judgeOrder(orderBy, orderFlag, "roe_basic")
+    orderList = []
+    if len(orderByList) > 0:
+        orderList = getOrderList(orderByList)
     try:
         if flag is not None and len(flag.strip()) > 0 and flag == 'byCode':
             # 分页查询
@@ -77,7 +74,7 @@ def getFinAnalysisIndexList():
                 .outerjoin(MbaIndustryClass, MbaFinAnalysisIndex.code == MbaIndustryClass.code) \
                 .outerjoin(MbaStockPool, MbaFinAnalysisIndex.code == MbaStockPool.code) \
                 .filter(*filterList) \
-                .order_by(*orderByList) \
+                .order_by(*orderList) \
                 .offset(startIndex).limit(pageSize).all()
             if industry_sw is not None and len(industry_sw.strip()) > 0:
                 totalNum = MbaFinAnalysisIndex.query.filter(*filterList)\
@@ -116,7 +113,7 @@ def getFinAnalysisIndexList():
                 .outerjoin(MbaIndustryClass, MbaFinAnalysisIndex.code == MbaIndustryClass.code) \
                 .outerjoin(MbaStockPool, MbaFinAnalysisIndex.code == MbaStockPool.code) \
                 .filter(*filterList) \
-                .order_by(*orderByList) \
+                .order_by(*orderList) \
                 .offset(startIndex).limit(pageSize).all()
             if industry_sw is not None and len(industry_sw.strip()) > 0:
                 totalNum = MbaFinAnalysisIndex.query \
@@ -143,3 +140,17 @@ def getFinAnalysisIndexList():
     successMap['totalNum'] = totalNum
     app.logger.info('end service getFinAnalysisIndexList------服务出参：' + str(successMap))
     return successMap
+
+
+# 获取排序列表
+def getOrderList(orderByList):
+    orderList = []
+    for orderByMap in orderByList:
+        orderBy = orderByMap['orderBy']
+        if 'des' == orderByMap['orderType']:
+            if 'roe_basic' == orderBy:
+                orderList.append((MbaFinAnalysisIndex.roe_avg * 1).desc())
+        else:
+            if 'roe_basic' == orderBy:
+                orderList.append((MbaFinAnalysisIndex.roe_avg * 1))
+    return orderList
